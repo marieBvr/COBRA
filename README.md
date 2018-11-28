@@ -4,13 +4,15 @@ COBRA
 > A **CO**mbination of systems **B**iology and experimental high-throughput approaches to engineer durable **R**esistance against pl**A**nt
 viruses in crops
 
----
+===========================
+
 > **COBRA** plant virus interaction database is developed in coordination with other plant genomics and bioinformatics groups via the consortium. The Plant KBBE project is funded by the European Commission within its 7th Framework Programme, under the thematic area. 
 (PLANT-KBBE) 2013 Projet COBRA
----
-Project ID: [ANR-13-KBBE-0006](http://www.agence-nationale-recherche.fr/Project-ANR-13-KBBE-0006)
+<br/> Project ID: [ANR-13-KBBE-0006](http://www.agence-nationale-recherche.fr/Project-ANR-13-KBBE-0006)
 
+===========================
 
+![cobra-logo](images/cobra-icon.png)
 <br/>
 
 ## Pre-requisite : CentOS 7
