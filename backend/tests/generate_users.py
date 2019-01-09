@@ -159,7 +159,7 @@ users_col.insert(users_table)
 
 characters = string.ascii_letters + string.digits
 password_gen =  "".join(choice(characters) for x in range(randint(8, 16)))
-print "jlgallois :" + password_gen
+print "jlgallois password:" + password_gen
 password=hashlib.md5(password_gen).hexdigest()
 
 users_table={
@@ -381,6 +381,23 @@ users_table={
 	'lastname' : 'Dragan',
 	'email_adress':'',
 	'institution':'JKI',
+	'grade':'administrator'
+	
+}
+users_col.insert(users_table)
+
+characters = string.ascii_letters  + string.digits
+password_gen =  "".join(choice(characters) for x in range(randint(8, 16)))
+print "glafforgue password :" + password_gen
+password=hashlib.md5(password_gen).hexdigest()
+
+users_table={
+	'login':'glafforgue',
+	'pwd': password,
+	'firstname':'Lafforgue',
+	'lastname' : 'Guillaume',
+	'email_adress':'',
+	'institution':'INRA Villenave d\'Ornon',
 	'grade':'administrator'
 	
 }
