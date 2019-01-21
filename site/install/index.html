@@ -4,14 +4,14 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="None">
         
         
-        <link rel="shortcut icon" href="img/favicon.ico">
-        <title>COBRA-Docs</title>
-        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="css/font-awesome.min.css" rel="stylesheet">
-        <link href="css/base.css" rel="stylesheet">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Install - COBRA-Docs</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -19,13 +19,13 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-        <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap-3.0.3.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
-    <body class="homepage">
+    <body>
 
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
@@ -39,21 +39,21 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href=".">COBRA-Docs</a>
+                    <a class="navbar-brand" href="..">COBRA-Docs</a>
                 </div>
 
                 <!-- Expanded navigation -->
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
+                            <li >
+                                <a href="..">HOME</a>
+                            </li>
                             <li class="active">
-                                <a href=".">HOME</a>
+                                <a href="./">Install</a>
                             </li>
                             <li >
-                                <a href="install/">Install</a>
-                            </li>
-                            <li >
-                                <a href="start-services/">Starting services</a>
+                                <a href="../start-services/">Starting services</a>
                             </li>
                         </ul>
 
@@ -63,13 +63,13 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li class="disabled">
-                                <a rel="next" >
+                            <li >
+                                <a rel="next" href="..">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li >
-                                <a rel="prev" href="install/">
+                                <a rel="prev" href="../start-services/">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -81,37 +81,124 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#home">HOME</a></li>
-            <li><a href="#welcome-to-cobra-documentation">Welcome to COBRA documentation</a></li>
-            <li><a href="#project-layout">Project layout</a></li>
+        <li class="main active"><a href="#install">Install</a></li>
+            <li><a href="#pre-requisite-centos-7">Pre-requisite : CentOS 7</a></li>
+            <li><a href="#install-git">Install git</a></li>
+            <li><a href="#install-php">Install php</a></li>
+            <li><a href="#install-mongodb">Install mongodb</a></li>
+            <li><a href="#install-nginx">Install nginx</a></li>
+            <li><a href="#install-mysql">Install mysql</a></li>
+            <li><a href="#install-r">Install R</a></li>
+            <li><a href="#add-epel-repository">Add epel repository</a></li>
+            <li><a href="#install-pip-and-pymongo">Install pip and pymongo</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="home">HOME</h1>
-<h2 id="welcome-to-cobra-documentation">Welcome to COBRA documentation</h2>
-<blockquote>
-<p>A <strong>CO</strong>mbination of systems <strong>B</strong>iology and experimental high-throughput approaches to develop sustainable <strong>R</strong>esistance against pl<strong>A</strong>nt
-viruses in crops.</p>
-</blockquote>
-<p><img align="left" style="margin-right: 15px" src="images/cobra-icon.png">
-<br/>
-<br/></p>
-<p><strong>COBRA</strong> plant virus interaction database is developed in coordination with other plant genomics and bioinformatics groups via the consortium. The Plant KBBE project is funded by the European Commission within its 7th Framework Programme, under the thematic area. 
-<br/> (PLANT-KBBE) 2013 Projet COBRA
-<br/> Project ID: <a href="http://www.agence-nationale-recherche.fr/Project-ANR-13-KBBE-0006">ANR-13-KBBE-0006</a></p>
-<p><br/>
-<br/>
-<br/>
-<br/>
-<br/></p>
-<!-- ![cobra-logo](images/cobra-icon.png){:style="float: right; } -->
+<h1 id="install">Install</h1>
+<h2 id="pre-requisite-centos-7">Pre-requisite : CentOS 7</h2>
+<ul>
+<li>Make sure your OS is up-to-date before running these command line.</li>
+</ul>
+<pre><code>sudo yum update
+sudo yum install yum-utils
+sudo yum install xlrd prettytable gcc openssl-devel
+</code></pre>
 
-<h2 id="project-layout">Project layout</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
+<h2 id="install-git">Install git</h2>
+<pre><code>sudo yum install git
+</code></pre>
+
+<h2 id="install-php">Install php</h2>
+<pre><code>sudo yum install php-gd php-mysql php-mbstring php-fpm php php-pear php-devel
+</code></pre>
+
+<h2 id="install-mongodb">Install mongodb</h2>
+<p>You can follow official instructions <a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/#configure-the-package-management-system-yum">MongoDB for CentOS</a> or use pecl :</p>
+<pre><code>sudo pecl install mongo
+sudo vi /etc/php.ini # uncomment line extension=mongo.so
+</code></pre>
+
+<h2 id="install-nginx">Install nginx</h2>
+<pre><code>sudo yum install nginx
+sudo vi /etc/nginx/nginx.conf
+</code></pre>
+
+<p>Paste this content on the server part and replace YOUR_SERVER_ADRESS :</p>
+<pre><code>    server {
+        #listen       80 default_server;
+        listen        YOUR_SERVER_ADRESS;
+        listen       [::]:80 default_server;
+        server_name  _;
+        root         /usr/share/nginx/html;
+    index   /info.php;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        location / {
+        }
+
+        error_page 404 /404.html;
+            location = /40x.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+            location = /50x.html {
+        }
+    }
+</code></pre>
+
+<p>Then, if not existing, create default.conf file :</p>
+<pre><code>sudo touch /etc/nging/conf.d/default.conf
+sudo vi /etc/nging/conf.d/default.conf
+</code></pre>
+
+<p>Then paste content :</p>
+<pre><code>server {
+    listen       80;
+    server_name  localhost;
+
+    # note that these lines are originally from the &quot;location /&quot; block
+    root   /usr/share/nginx/html;
+    index login.php;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+</code></pre>
+
+<p>See <a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-centos-7#step-one-%E2%80%94-install-nginx">here</a> for more information.</p>
+<h2 id="install-mysql">Install mysql</h2>
+<pre><code>sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+sudo yum install mysql-community-server
+</code></pre>
+
+<h2 id="install-r">Install R</h2>
+<pre><code>sudo yum install R
+</code></pre>
+
+<h2 id="add-epel-repository">Add epel repository</h2>
+<pre><code>sudo yum install epel-release
+</code></pre>
+
+<h2 id="install-pip-and-pymongo">Install pip and pymongo</h2>
+<pre><code>sudo yum -y install python-pip
+sudo python -m pip install --upgrade pymongo
 </code></pre></div>
         </div>
 
@@ -120,11 +207,11 @@ docs/
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = ".",
+            var base_url = "..",
                 shortcuts = {"search": 83, "next": 78, "help": 191, "previous": 80};
         </script>
-        <script src="js/base.js" defer></script>
-        <script src="search/main.js" defer></script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
     <div class="modal-dialog">
@@ -192,8 +279,3 @@ docs/
 
     </body>
 </html>
-
-<!--
-MkDocs version : 1.0.4
-Build Date UTC : 2019-01-21 10:24:02
--->

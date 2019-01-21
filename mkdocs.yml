@@ -1,1 +1,5 @@
-site_name: My Docs
+site_name: COBRA-Docs
+nav:
+  - 'index.md'
+  - 'install.md'
+  - 'start-services.md'

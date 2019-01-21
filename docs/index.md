@@ -1,13 +1,26 @@
-# Welcome to COBRA documentation
+# HOME
 
-For full documentation visit [mkdocs.org](https://mkdocs.org).
+## Welcome to COBRA documentation
 
-## Commands
+> A **CO**mbination of systems **B**iology and experimental high-throughput approaches to develop sustainable **R**esistance against pl**A**nt
+viruses in crops.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs help` - Print this help message.
+<img align="left" style="margin-right: 15px" src="images/cobra-icon.png">
+<br/>
+<br/>
+
+**COBRA** plant virus interaction database is developed in coordination with other plant genomics and bioinformatics groups via the consortium. The Plant KBBE project is funded by the European Commission within its 7th Framework Programme, under the thematic area. 
+<br/> (PLANT-KBBE) 2013 Projet COBRA
+<br/> Project ID: [ANR-13-KBBE-0006](http://www.agence-nationale-recherche.fr/Project-ANR-13-KBBE-0006)
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<!-- ![cobra-logo](images/cobra-icon.png){:style="float: right; } -->
+
 
 ## Project layout
 
