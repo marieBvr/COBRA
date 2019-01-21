@@ -18,7 +18,7 @@ viruses in crops.
 <br/>
 
 ## Documentation
-See [documentation](https://cobra-documentation.readthedocs.io/en/latest/).
+See [documentation](https://marieBvr.github.io/COBRA/).
 
 ## Contact
 A COBRA instance is available [here](https://services.cbib.u-bordeaux.fr/cobra/login.php).
