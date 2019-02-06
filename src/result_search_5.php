@@ -119,7 +119,8 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
             array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi"))))),
         array('$project' => array("mapping_file"=>1,'_id'=>0))
-    ));
+    ),
+        array('cursor' => ["batchSize" => 0]));
     
     
     ///////////////////////////////////
@@ -148,7 +149,7 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
     //////////////////////////////////////////   
     
     if (count($cursor['result'])>0){
-
+        echo $cursor['result'];
         foreach ($cursor['result'] as $result) {
             //
             //echo $result['mapping_file']['Gene ID'];
