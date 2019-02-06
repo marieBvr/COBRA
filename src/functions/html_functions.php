@@ -392,7 +392,7 @@ echo'
                             <h1>  </h1>
                              <p class="text-muted" style="text-align: left">
                                 <br/>
-                                Database and website created by the <a href="http://www.cbib.u-bordeaux.fr/">CBiB</a>
+                                Database and website created by the <a href="http://www.cbib.u-bordeaux.fr/">CBiB</a> and <a href="https://www6.bordeaux-aquitaine.inra.fr/bfp/Recherche/Equipe-de-Virologie-vegetale">INRA</a>
                             </p>';
                             if ($val){
                                 echo'
