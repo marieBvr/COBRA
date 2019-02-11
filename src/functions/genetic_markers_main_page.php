@@ -34,16 +34,17 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
             array('$project' => array('mapping_file'=>1,'_id'=>0)),
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('$and'=> array(
-                                            array('mapping_file.Start'=>array('$gt'=> (int)$gene_start )),
-                                            array('mapping_file.Start'=>array('$lt'=> (int)$gene_end )),
-                                            array('mapping_file.End'=>array('$gt'=> (int)$gene_start )),
-                                            array('mapping_file.End'=>array('$lt'=> (int)$gene_end )),
-                                            array('mapping_file.Chromosome'=> $scaffold )
-                                               )
-                                            )),
+                array('mapping_file.Start'=>array('$gt'=> (int)$gene_start )),
+                array('mapping_file.Start'=>array('$lt'=> (int)$gene_end )),
+                array('mapping_file.End'=>array('$gt'=> (int)$gene_start )),
+                array('mapping_file.End'=>array('$lt'=> (int)$gene_end )),
+                array('mapping_file.Chromosome'=> $scaffold )
+            ))),
             array('$project'=>  array('mapping_file.Marker ID'=> 1, 'mapping_file.HREF_markers'=> 1,'mapping_file.HREF_species'=> 1,'mapping_file.Species'=>1,'mapping_file.Start'=>1,'mapping_file.End'=>1,'mapping_file.Map ID'=>1,'mapping_file.Chromosome'=>1,'mapping_file.Type'=>1,'mapping_file.Linkage Group'=>1,'mapping_file.StartcM'=>1,'_id'=> 0))
 
-        ));
+        ),
+        array('cursor' => array("batchSize" => 10))
+    );
         
         foreach ($genetic_markers_result['result'] as $value) {
             foreach ($value['mapping_file'] as $value_tocheck) {
@@ -80,31 +81,30 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
             array('$project' => array('mapping_file'=>1,'_id'=>0)),
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('$and'=> array(
-                                            array('mapping_file.Start'=>array('$gt'=> $gene_start )),
-                                            array('mapping_file.Start'=>array('$lt'=> $gene_end )),
-                                            array('mapping_file.Chromosome'=> $scaffold_number[1] )
-                                                )
-                                    )
-                ),
+                array('mapping_file.Start'=>array('$gt'=> $gene_start )),
+                array('mapping_file.Start'=>array('$lt'=> $gene_end )),
+                array('mapping_file.Chromosome'=> $scaffold_number[1])
+            ))),
             array('$project'=>  array('mapping_file.Marker ID'=> 1,'mapping_file.Start'=>1,'mapping_file.Chromosome'=>1,'mapping_file.Type'=>1,'mapping_file.LG_ICuGI'=>1,'mapping_file.cM_ICuGI'=>1,'_id'=> 0))
-
-        ));
+        ),
+        array('cursor' => array("batchSize" => 10)));
     }
     else if($species==="Hordeum vulgare"){
         //http://archive.gramene.org/db/markers/marker_view?marker_name=AQGV002&vocabulary=markers&search_box_name=marker_name&search_box_id=marker_search_for&marker_type_id=20&taxonomy=Hordeum&action=marker_search&x=3&y=11
     }
     else{
         $var_results=$variation_collection->aggregate(array(
-                    array('$match' => array('species'=> $species)),  
-                    array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-                    array('$unwind'=>'$mapping_file'),
-                    array('$match' =>  array('mapping_file.Gene ID'=>array('$in'=>$gene_id))), 
-                    array('$project'=>  array('mapping_file.Variant ID'=> 1,'mapping_file.Gene ID'=> 1, 'mapping_file.Position'=>1,'mapping_file.Description'=>1, 'mapping_file.Alleles'=>1))
+            array('$match' => array('species'=> $species)),  
+            array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
+            array('$unwind'=>'$mapping_file'),
+            array('$match' =>  array('mapping_file.Gene ID'=>array('$in'=>$gene_id))), 
+            array('$project'=>  array('mapping_file.Variant ID'=> 1,'mapping_file.Gene ID'=> 1, 'mapping_file.Position'=>1,'mapping_file.Description'=>1, 'mapping_file.Alleles'=>1))
 
-                ));
+            ),
+            array('cursor' => array("batchSize" => 10)));
     }
     
-    if (isset($genetic_markers_result['result']) && count ($genetic_markers_result['result'])>0){
+    if (isset($genetic_markers_result['cursor']['firstBatch']) && count ($genetic_markers_result['cursor']['firstBatch'])>0){
         //error_log("----------------------------------".count($genetic_markers_result['result']));
         if ($mode==="GM"){
             echo'<table class="table" id="table_markers">  

@@ -45,7 +45,6 @@ echo '<br/>';
 echo '<br/>';
 echo '<br/>';
 echo '<br/>';
-echo '<div id="data_description">';
 
 
 //$experiment_cursor=find_all_xp_name($samplesCollection);
@@ -54,39 +53,37 @@ echo '<div id="data_description">';
 
 $experiment_cursor=find_xp_name_group_by_species($samplesCollection);
 
-echo'<div class="panel-group" id="accordion_documents">
+echo'
+<div id="data_description">
+	<div class="panel-group" id="accordion_documents">
         <div class="panel panel-default">
             <div class="panel-heading">  
-                    <a class="accordion-toggle collapsed" href="#Experiments_lists" data-parent="#accordion_documents" data-toggle="collapse">
-                        <strong>Experiments</strong>
-                    </a>				
+                <a class="accordion-toggle collapsed" href="#Experiments_lists" data-parent="#accordion_documents" data-toggle="collapse">
+                    <strong>Experiments</strong>
+                </a>				
             </div>
-            <div class="panel-body panel-collapse collapse" id="Experiments_lists">
+        <div class="panel-body panel-collapse collapse" id="Experiments_lists">
+		';
+		foreach ($experiment_cursor['cursor']['firstBatch'] as $value) {
+		    foreach ($value['_id'] as $species) {
+		        $experiment_table_string="";
+		        $experiment_table_string.='<ul>';
+		        foreach ($value['xps'] as $xpName) {
 
+		            #echo $xpName;
+		            $experiment_table_string.='<li value="'.$xpName['name'].'"><a href="experiments.php?xp='.str_replace(' ','\s',$xpName['name']).'">'.$xpName['name'].'</a> ('.$xpName['type'].')</li>';
 
-                   ';
-                    foreach ($experiment_cursor['result'] as $value) {
-                        foreach ($value['_id'] as $species) {
-                            $experiment_table_string="";
-                            $experiment_table_string.='<ul>';
-                            foreach ($value['xps'] as $xpName) {
+		        }
+		        $experiment_table_string.='</ul>';
+		        add_accordion_panel($experiment_table_string, $species,str_replace(' ','_',$species));
+		        echo'<br/>';
 
-                                #echo $xpName;
-                                $experiment_table_string.='<li value="'.$xpName['name'].'"><a href="experiments.php?xp='.str_replace(' ','\s',$xpName['name']).'">'.$xpName['name'].'</a> ('.$xpName['type'].')</li>';
-
-                            }
-                            $experiment_table_string.='</ul>';
-                            add_accordion_panel($experiment_table_string, $species,str_replace(' ','_',$species));
-                            echo'<br/>';
-
-                        }
-                    }
-                    echo'
-
-            </div>
-
+		    }
+		}
+		echo'
         </div>
-    </div>    
+    </div>
+</div>    
 <br/>
 <br/>';
 

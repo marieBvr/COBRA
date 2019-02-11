@@ -117,54 +117,72 @@ if (((isset($_GET['organism'])) && ($_GET['organism']!='')) && ((isset($_GET['se
     try{
         $cursor_array=array();
         if($organism=="All species"){
-            //$timestart1=microtime(true);
             foreach ($list_search as $search) {
-                $cursor=$full_mappingsCollection->aggregate(array(
- 
-                array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-                array('$unwind'=>'$mapping_file'),
-                array('$match' => array('$or'=> array(array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Description'=>new MongoRegex("/^$search/xi")),array('mapping_file.Description'=>new MongoRegex("/$search/xi")),array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID 2'=>new MongoRegex("/$search$/xi")),array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi"))))),
-                array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
-                ));
+                $cursor=$full_mappingsCollection->aggregate(array( 
+                    array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
+                    array('$unwind'=>'$mapping_file'),
+                    array('$match' => array('$or'=> array(
+                        array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Description'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Description'=>new MongoRegex("/$search/xi")),
+                        array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID'=> $search),
+                        array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),
+                        array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID 2'=>new MongoRegex("/$search$/xi")),
+                        array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi"))
+                    ))),
+                    array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
+                ),
+                // array("allowDiskUse" => True),
+                array('cursor' => ["batchSize" => 10]));
                 array_push($cursor_array, $cursor);
             }
-            
-//             $timeend1=microtime(true);
-//            $time1=$timeend1-$timestart1;
-//            //Afficher le temps d'éxecution
-//            $page_load_time1 = number_format($time1, 3);
-//            echo "Debut du script: ".date("H:i:s", $timestart1);
-//            echo "<br>Fin du script: ".date("H:i:s", $timeend1);
-//            echo "<br>Script for search all species executed in " . $page_load_time1 . " sec";
         }
         else{
             foreach ($list_search as $search) {
                 //$timestart1=microtime(true);
                 $cursor=$full_mappingsCollection->aggregate(array(
-                array('$match' => array('species'=>$organism)),  
-                array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-                array('$unwind'=>'$mapping_file'),
-                array('$match' => array('$or'=> array(array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Description'=>new MongoRegex("/^$search/xi")),array('mapping_file.Description'=>new MongoRegex("/$search/xi")),array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi")),array('mapping_file.Gene ID 2'=>new MongoRegex("/$search$/xi")),array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi"))))),
-                array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
-                ));
+                    array('$match' => array('species'=>$organism)),  
+                    array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
+                    array('$unwind'=>'$mapping_file'),
+                    array('$match' => array('$or'=> array(
+                        array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Description'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Description'=>new MongoRegex("/$search/xi")),
+                        array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),
+                        array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi")),
+                        array('mapping_file.Gene ID 2'=>new MongoRegex("/$search$/xi")),
+                        array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi"))))
+                    ),
+                    array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
+                ),
+                array('cursor' => ["batchSize" => 10]));
                 array_push($cursor_array, $cursor);
             }
-//            $timeend1=microtime(true);
-//            $time1=$timeend1-$timestart1;
-//            //Afficher le temps d'éxecution
-//            $page_load_time1 = number_format($time1, 3);
-//            echo "Debut du script: ".date("H:i:s", $timestart1);
-//            echo "<br>Fin du script: ".date("H:i:s", $timeend1);
-            //echo "<br>Script for given species executed in " . $page_load_time1 . " sec";
         }
     }
     catch ( MongoResultException $e )
     {
-    	echo '<p>aggregation result exceeds maximum document size (16MB), you need to be more precise in your query</p>';
+    	echo '<p>Aggregation result exceeds maximum document size (16MB), you need to be more precise in your query</p>';
+        echo $e;
     	exit();
     }
     stop_time_capture($ts);
-    display_multi_results_table($cursor_array);
+    display_multi_results_table($cursor_array[0]['cursor']);
     
     
 //    if (count($cursor['result'])>=1) { 

@@ -52,51 +52,7 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
     $genetic_markers_collection=new Mongocollection($db, "genetic_markers");
     $qtl_collection=new Mongocollection($db, "qtls");
 
-    
- 
-/*    /////////////////////////////////////////////
-    //SEARCH THE CUMULATED SCORE FOR A GIVEN ID//
-    /////////////////////////////////////////////
-    //$timestart1=microtime(true);
-//    $cursor_score=$full_mappingsCollection->aggregate(array(
-//         array('$match' => array('type'=>'full_table','species'=>$species)),  
-//         array('$project' => array('mapping_file'=>1,'_id'=>0)),
-//         array('$unwind'=>'$mapping_file'),
-//         array('$match' => array('mapping_file.Gene ID'=>$search)),
-//         array(
-//           '$group'=>
-//             array(
-//               '_id'=> array( 'gene'=> '$mapping_file.Gene ID' ),
-//               //'scores'=> array('$addToSet'=> '$mapping_file.Score_exp')
-//
-//               'scores'=> array('$addToSet'=> array('exp'=>'$mapping_file.Score_exp','int'=>'$mapping_file.Score_int','ort'=>'$mapping_file.Score_orthologs','qtl'=>'$mapping_file.Score_QTL','snp'=>'$mapping_file.Score_SNP') )
-//             )
-//         )
-//
-//    ));
    
-    ///////////////////////////////
-    //SUM ALL SCORE FOR THIS GENE//
-    ///////////////////////////////   
-//    foreach ($cursor_score['result'] as $value) {
-//        foreach ($value['scores'] as $tmp_score) {    
-//            $score+=$tmp_score['exp'];
-//            $score+=$tmp_score['int'];  
-//            $score+=$tmp_score['ort'];  
-//            $score+=$tmp_score['qtl'];  
-//            $score+=$tmp_score['snp'];  
-//        }  
-//    } 
-//    $today = date("F j, Y, g:i a");
-//    $document = array("firstname" => $_SESSION['firstname'],
-//                      "lastname" => $_SESSION['lastname'],
-//                      "search id" => $_GET['search'],
-//                      "type" => "search",
-//                      "score" =>$score,
-//                      "date" => $today
-//    );
-//    $historyCollection->insert($document);*/
-    
 
     ///////////////////////////////////////////////////////
     //SEARCH ENTRY IN FULL TABLE MAPPING WITH SAME ID//
@@ -106,21 +62,23 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
         array('$project' => array('mapping_file'=>1,'_id'=>0)),
         array('$unwind'=>'$mapping_file'),
         array('$match' => array('$or'=> array(
-            /*array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),
+            // array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),
             //array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),
+            // array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),
             //array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),
+            // array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),
             //array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),*/
+            //array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),
+            // array('mapping_file.Gene ID'=> $search),
             array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi"))))),
         array('$project' => array("mapping_file"=>1,'_id'=>0))
     ),
-        array('cursor' => ["batchSize" => 0]));
+        // array("allowDiskUse" => True),
+        array('cursor' => array("batchSize" => 10)));
     
     
     ///////////////////////////////////
@@ -143,14 +101,11 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
     $percent_array=array();
     $score=0.0;
 
-
     //////////////////////////////////////////
     //PARSE RESULT AND FILL DEDICATED ARRAYS//
     //////////////////////////////////////////   
-    
-    if (count($cursor['result'])>0){
-        echo $cursor['result'];
-        foreach ($cursor['result'] as $result) {
+    if (count($cursor['cursor']['firstBatch'])>0){
+        foreach ($cursor['cursor']['firstBatch'] as $result) {
             //
             //echo $result['mapping_file']['Gene ID'];
             //echo $result['mapping_file']['Gene ontology ID'];

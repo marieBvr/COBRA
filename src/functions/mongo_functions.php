@@ -3319,7 +3319,9 @@ function find_all_species(MongoCollection $sp){
 								'_id'=>0
 								)
 					)
-				));	
+				),
+            array('cursor' => ["batchSize" => 0])
+        );	
 	}
     catch ( MongoConnectionException $e )
     {
@@ -3399,15 +3401,17 @@ function find_all_viruses(MongoCollection $vi){
 		
 		$cursor=$vi->aggregate(array( 
 			array('$project' => 
-						array('full_name' => 1,
-								'species' => '$classification.species',
-								'aliases' => 1,
-								'top' => '$classification.top_level',
-                                'genus'=> '$classification.genus',
-								'_id'=>0
-								)
+				array('full_name' => 1,
+					'species' => '$classification.species',
+					'aliases' => 1,
+					'top' => '$classification.top_level',
+                    'genus'=> '$classification.genus',
+					'_id'=>0
 					)
-				));	
+				)
+			),
+            array('cursor' => ["batchSize" => 0])
+        );	
 	}
     catch ( MongoConnectionException $e )
     {
@@ -3451,8 +3455,8 @@ function find_xp_name_group_by_species(Mongocollection $sa){
 
                     //'xps'=> array( '$addToSet'=> '$name' )
                 )
-            )
-        )        
+            )),
+            array('cursor' => ["batchSize" => 15])        
     );
     return $cursor;
 }

@@ -87,7 +87,7 @@ $GOCollection = new Mongocollection($db, "gene_ontology");
             <div class="col-md-6" >
                 <div id="image_container">
                     <hr  size=0.5>
-                    <a href="http://www.inra.fr/"><img class="displayed" id="partner_logo" src="./images/logo-inra_w186.jpg"/></a>
+                    <a href="http://www.inra.fr/"><img class="displayed" id="partner_logo" width="180px" src="./images/logo-inra_w186.png"/></a>
                 </div>
                 <div id="image_container">
                     <hr  size=0.5>     
