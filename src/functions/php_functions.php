@@ -509,10 +509,20 @@ function display_statistics_with_ajax(){
 
     $stat_string.='<div  class="stats-panel">'
           .'<div class="col-md-12" >'
-             . '<div id="transtat" class="col-md-5" >
-                <h2> Transcriptomics </h2>
+             . '<div id="transtat" class="col-md-5">
+                <h2>Transcriptomics statistics</h2>
                 <h4>Experiments : '.$sampleCollection->count().'</h4>';
                 $stat_string.='<h4>Expression measures per species (micro-array and RNA-seq):</h4>';
+                $stat_string.='<table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Species</th>
+                      <th scope="col">Experiments</th>
+                      <th scope="col">Samples</th>
+                      <th scope="col">Measures</th>
+                    </tr>
+                  </thead>
+                  <tbody>';
                 $specieslist=$speciesCollection->find(array(),array('full_name'=>1));
                 foreach ($specieslist as $species) {
                     $total=$sampleCollection->count(array('species'=>$species['full_name']));
@@ -523,18 +533,33 @@ function display_statistics_with_ajax(){
                         //error_log(count($value['experimental_results'])); 
                         $total_samples+=count($value['experimental_results']);
                     }
-                   $text=' experiments';
-                   if ($total===1){
+                    $text=' experiments';
+                    if ($total===1){
                        $text=' experiment';
-                   }
+                    }
                    
-                   $stat_string.='<li style="margin-left:30px;">'.$species['full_name'].' ('.$total.$text.'-'.$total_samples.' samples): '.$measurementsCollection->count(array('species'=>$species['full_name'])).'</li>';
+                    $stat_string.='<tr>
+                      <td>'.$species['full_name'].'</td>
+                      <td>'.$total.'</td>
+                      <td>'.$total_samples.'</td>
+                      <td>'.$measurementsCollection->count(array('species'=>$species['full_name'])).'</td>
+                    </tr>';
+                   // <li style="margin-left:30px;">'.$species['full_name'].' ('.$total.$text.'-'.$total_samples.' samples): '.$measurementsCollection->count(array('species'=>$species['full_name'])).'</li>';
                 
                 }
+                $stat_string.='</tbody></table>';
                 $stat_string.='<div class="shift_line"/>';
  $stat_string.='</div>';
                 $stat_string.='<div id="transtat" class="col-md-5" >';
                 $stat_string.='<h2> Interactomics </h2>';
+                $stat_string.='<table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Interaction type</th>
+                      <th scope="col">Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>';
                 $pv_fields=array(array('$project' => array('mapping_file'=>1,'_id'=>0)));
                 $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 10]));
                 //var_dump($cursor_ppi);
@@ -545,7 +570,11 @@ function display_statistics_with_ajax(){
                     }
 
                 }
-                $stat_string.= '<h4>Plant-Virus [HPIDB + Literature] interactions: '.$total_pvi.'</h4>';
+                $stat_string.='<tr>
+                    <td>Plant-Virus [HPIDB + Literature]</td>
+                    <td>'.$total_pvi.'</td>
+                </tr>';
+                // $stat_string.= '<h4>Plant-Virus [HPIDB + Literature] interactions: '.$total_pvi.'</h4>';
 
                 $pp_biogrid_fields=array(array('$match' => array('origin'=>'BIOGRID')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
                 $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 10]));
@@ -557,7 +586,11 @@ function display_statistics_with_ajax(){
 
                 }
 
-                $stat_string.= '<h4>Biogrid Plant-Plant interactions: '.$total_ppi_biogrid.'</h4>';
+                $stat_string.='<tr>
+                    <td>Biogrid Plant-Plant</td>
+                    <td>'.$total_ppi_biogrid.'</td>
+                </tr>';
+                // $stat_string.= '<h4>Biogrid Plant-Plant interactions: '.$total_ppi_biogrid.'</h4>';
                 $pp_intact_fields=array(array('$match' => array('origin'=>'INTACT')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
                 $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 10]));
                 $total_ppi_intact=0;
@@ -568,27 +601,61 @@ function display_statistics_with_ajax(){
 
                 }
 
-                $stat_string.= '<h4>Intact Plant-Plant interactions: '.$total_ppi_intact.'</h4>';
-                $stat_string.= '<h4>String Plant-Plant interactions: 25382632</h4>';
+                $stat_string.='<tr>
+                    <td>Intact Plant-Plant</td>
+                    <td>'.$total_ppi_intact.'</td>
+                </tr></tbody></table>';
+                // $stat_string.= '<h4>Intact Plant-Plant interactions: '.$total_ppi_intact.'</h4>';
+                $stat_string.='<h2> Overview </h2>';
                 $stat_string.='</div>';
                 $stat_string.='<div id="transtat" class="col-md-2" >';
-                $stat_string.= '<h4>Species : '.$speciesCollection->count().'</h4>';
+                $stat_string.='<table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Description</th>
+                      <th scope="col">Details</th>
+                      <th scope="col">Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>';
+                $stat_string.='<tr>
+                    <td>Species</td>
+                    <td></td>
+                    <td>'.$speciesCollection->count().'</td>
+                </tr>';
+                // $stat_string.= '<h4>Species : '.$speciesCollection->count().'</h4>';
 
                 $cursor_species=$speciesCollection->aggregate(array(
                     array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
                 ), array('cursor' => ["batchSize" => 10]));
-                $stat_string.='<h4>Species per top_level</h4>';
+                // $stat_string.='<h4>Species per top_level</h4>';
                 foreach ($cursor_species['cursor']['firstBatch'] as $doc){
-                        $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
+                    $stat_string.='<tr>
+                        <td>Species per top_level</td>
+                        <td>'.$doc['_id'].'</td>
+                        <td>'.$doc['count'].'</td>
+                    </tr>';
+                    // $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
                 }
-                $stat_string.= '<h4>Viruses : '.$virusCollection->count().'</h4>';
+                // $stat_string.= '<h4>Viruses : '.$virusCollection->count().'</h4>';
+                $stat_string.='<tr>
+                    <td>Viruses</td>
+                    <td></td>
+                    <td>'.$virusCollection->count().'</td>
+                </tr>';
                 $cursor_virus=$virusCollection->aggregate(array(
                 array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
                 ), array('cursor' => ["batchSize" => 10]));
-                $stat_string.='<h4> Pathogens per top_level</h4>';
+                // $stat_string.='<h4> Pathogens per top_level</h4>';
                 foreach ($cursor_virus['cursor']['firstBatch'] as $doc){
-                        $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
+                    $stat_string.='<tr>
+                        <td>Pathogens per top_level</td>
+                        <td>'.$doc['_id'].'</td>
+                        <td>'.$doc['count'].'</td>
+                    </tr>';
+                        // $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
                 }
+                $stat_string.= '</tbody></table>';
                 $stat_string.='</div>';
                 $stat_string.='</div>';
                 $stat_string.='</div>';     
@@ -615,10 +682,10 @@ function display_statistics(){
                     <h4>Normalized measures : '.$measurementsCollection->count().'</h4>';
                     
                     $pv_fields=array(array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields);
+                    $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 10]));
                     //var_dump($cursor_ppi);
                     $total_pvi=0;
-                    foreach ($cursor_pvi['result'] as $value) {
+                    foreach ($cursor_pvi['cursor']['firstBatch'] as $value) {
                         foreach ($value['mapping_file'] as $mapping_file) {
                             $total_pvi++;
                         }
@@ -627,9 +694,9 @@ function display_statistics(){
                     $stat_string.= '<h4>Plant-Virus [HPIDB + Literature] interactions: '.$total_pvi.'</h4>';
                     
                     $pp_biogrid_fields=array(array('$match' => array('origin'=>'BIOGRID')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields);
+                    $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 10]));
                     $total_ppi_biogrid=0;
-                    foreach ($cursor_ppi_biogrid['result'] as $value) {
+                    foreach ($cursor_ppi_biogrid['cursor']['firstBatch'] as $value) {
                         foreach ($value['mapping_file'] as $mapping_file) {
                             $total_ppi_biogrid++;
                         }
@@ -638,9 +705,9 @@ function display_statistics(){
                     
                     $stat_string.= '<h4>Biogrid Plant-Plant interactions: '.$total_ppi_biogrid.'</h4>';
                     $pp_intact_fields=array(array('$match' => array('origin'=>'INTACT')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields);
+                    $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 10]));
                     $total_ppi_intact=0;
-                    foreach ($cursor_ppi_intact['result'] as $value) {
+                    foreach ($cursor_ppi_intact['cursor']['firstBatch'] as $value) {
                         foreach ($value['mapping_file'] as $mapping_file) {
                             $total_ppi_intact++;
                         }
@@ -653,18 +720,18 @@ function display_statistics(){
                     $stat_string.= '<h4>Species : '.$speciesCollection->count().'</h4>';
 
                     $cursor_species=$speciesCollection->aggregate(array(
-                    array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                    ));
+                        array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
+                    ), array('cursor' => ["batchSize" => 10]));
                     $stat_string.='<h4>Species per top_level</h4>';
-                    foreach ($cursor_species['result'] as $doc){
+                    foreach ($cursor_species['cursor']['firstBatch'] as $doc){
                             $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
                     }
                     $stat_string.= '<h4>Viruses : '.$virusCollection->count().'</h4>';
                     $cursor_virus=$virusCollection->aggregate(array(
                     array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                    ));
+                    ), array('cursor' => ["batchSize" => 10]));
                     $stat_string.='<h4> Pathogens per top_level</h4>';
-                    foreach ($cursor_virus['result'] as $doc){
+                    foreach ($cursor_virus['cursor']['firstBatch'] as $doc){
                             $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
                     }
         add_accordion_panel($stat_string, "Some statistics", "stat_panel");
