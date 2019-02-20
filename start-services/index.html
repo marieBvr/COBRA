@@ -93,26 +93,31 @@
 
 <h1 id="starting-services">Starting services</h1>
 <h2 id="start-mysql-and-configure">Start mysql and configure</h2>
-<pre><code>/usr/bin/systemctl start mysqld
+<pre><code class="bash">/usr/bin/systemctl start mysqld
 /usr/bin/mysql_secure_installation
 # exemple mysql -u root -p mysql
 </code></pre>
 
 <h2 id="open-port-3306tcp">Open port 3306/tcp</h2>
-<pre><code>firewall-cmd --permanent --zone=trusted --add-port=3306/tcp
+<pre><code class="bash">firewall-cmd --permanent --zone=trusted --add-port=3306/tcp
 firewall-cmd  --reload
 </code></pre>
 
 <h2 id="start-mongodb">Start mongodb</h2>
-<pre><code>sudo service mongod start
+<p>Autorize network connexion</p>
+<pre><code class="bash">/usr/sbin/setsebool -P httpd_can_network_connect 1
+</code></pre>
+
+<p>Start service</p>
+<pre><code class="bash">sudo service mongod start
 </code></pre>
 
 <h2 id="start-php">Start php</h2>
-<pre><code>sudo systemctl start php-fpm
+<pre><code class="bash">sudo systemctl start php-fpm
 </code></pre>
 
 <h2 id="start-nginx">Start nginx</h2>
-<pre><code>sudo systemctl start nginx
+<pre><code class="bash">sudo systemctl start nginx
 </code></pre></div>
         </div>
 
