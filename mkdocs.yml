@@ -3,3 +3,4 @@ nav:
   - 'index.md'
   - 'install.md'
   - 'start-services.md'
+  - 'database.md'
