@@ -2,31 +2,31 @@
 
 ## Pre-requisite : CentOS 7
 * Make sure your OS is up-to-date before running these command line.
-```
+```bash
 sudo yum update
 sudo yum install yum-utils
 sudo yum install xlrd prettytable gcc openssl-devel
 ```
 
 ## Install git
-```
+```bash
 sudo yum install git
 ```
 
 ## Install php
-```
+```bash
 sudo yum install php-gd php-mysql php-mbstring php-fpm php php-pear php-devel
 ```
 
 ## Install mongodb 
 You can follow official instructions [MongoDB for CentOS](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/#configure-the-package-management-system-yum) or use pecl :
-```
+```bash
 sudo pecl install mongo
 sudo vi /etc/php.ini # uncomment line extension=mongo.so
 ```
 
 ## Install nginx
-```
+```bash
 sudo yum install nginx
 sudo vi /etc/nginx/nginx.conf
 ```
@@ -56,7 +56,7 @@ Paste this content on the server part and replace YOUR_SERVER_ADRESS :
     }
 ```
 Then, if not existing, create default.conf file :
-```
+```bash
 sudo touch /etc/nging/conf.d/default.conf
 sudo vi /etc/nging/conf.d/default.conf
 ```
@@ -91,23 +91,23 @@ server {
 See [here](https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-centos-7#step-one-%E2%80%94-install-nginx) for more information.
 
 ## Install mysql
-```
+```bash
 sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
 sudo yum install mysql-community-server
 ```
 
 ## Install R
-```
+```bash
 sudo yum install R
 ```
 
 ## Add epel repository
-```
+```bash
 sudo yum install epel-release
 ```
 
 ## Install pip and pymongo
-```
+```bash
 sudo yum -y install python-pip
 sudo python -m pip install --upgrade pymongo
 ```
