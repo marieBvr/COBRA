@@ -25,9 +25,8 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
     $mode=$_POST['mode'];
 
     $genetic_markers_result=array();
-    error_log($species);
+    // error_log($species);
     if ($species==="Prunus persica"){
-
         error_log("species prunus persica ".$species);
         $scaffold='scaffold_'.$scaffold;
         $genetic_markers_result=$genetic_markers_collection->aggregate(array(  
@@ -43,10 +42,9 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
             array('$project'=>  array('mapping_file.Marker ID'=> 1, 'mapping_file.HREF_markers'=> 1,'mapping_file.HREF_species'=> 1,'mapping_file.Species'=>1,'mapping_file.Start'=>1,'mapping_file.End'=>1,'mapping_file.Map ID'=>1,'mapping_file.Chromosome'=>1,'mapping_file.Type'=>1,'mapping_file.Linkage Group'=>1,'mapping_file.StartcM'=>1,'_id'=> 0))
 
         ),
-        array('cursor' => array("batchSize" => 10))
-    );
+        array('cursor' => ["batchSize" => 20]));
         
-        foreach ($genetic_markers_result['result'] as $value) {
+        foreach ($genetic_markers_result['cursor']['firstBatch'] as $value) {
             foreach ($value['mapping_file'] as $value_tocheck) {
                 error_log($value_tocheck); 
             }
@@ -68,7 +66,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
                          ),
                     array('$project'=>  array('mapping_file.Variant ID'=> 1, 'mapping_file.Position'=>1,'mapping_file.Alleles'=>1))
 
-                ));
+                ), array('cursor' => ["batchSize" => 20]));
 //        foreach ($var_results as $value) {
 //             echo $value['mapping_file'];       
 //        }
@@ -87,7 +85,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
             ))),
             array('$project'=>  array('mapping_file.Marker ID'=> 1,'mapping_file.Start'=>1,'mapping_file.Chromosome'=>1,'mapping_file.Type'=>1,'mapping_file.LG_ICuGI'=>1,'mapping_file.cM_ICuGI'=>1,'_id'=> 0))
         ),
-        array('cursor' => array("batchSize" => 10)));
+        array('cursor' => ["batchSize" => 20]));
     }
     else if($species==="Hordeum vulgare"){
         //http://archive.gramene.org/db/markers/marker_view?marker_name=AQGV002&vocabulary=markers&search_box_name=marker_name&search_box_id=marker_search_for&marker_type_id=20&taxonomy=Hordeum&action=marker_search&x=3&y=11
@@ -101,7 +99,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
             array('$project'=>  array('mapping_file.Variant ID'=> 1,'mapping_file.Gene ID'=> 1, 'mapping_file.Position'=>1,'mapping_file.Description'=>1, 'mapping_file.Alleles'=>1))
 
             ),
-            array('cursor' => array("batchSize" => 10)));
+            array('cursor' => ["batchSize" => 20]));
     }
     
     if (isset($genetic_markers_result['cursor']['firstBatch']) && count ($genetic_markers_result['cursor']['firstBatch'])>0){
@@ -126,7 +124,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
 
                     <tbody>';
 
-                        foreach ($genetic_markers_result['result'] as $value) {
+                        foreach ($genetic_markers_result['cursor']['firstBatch'] as $value) {
                             foreach($value as $data){
                                 echo "<tr>";
                                 //echo '<td><a class="nowrap" target = "_blank" href="https://services.cbib.u-bordeaux2.fr/cobra/src/result_search_5.php?organism='.$species.'&search='.$value['Gene ID'].'">'.$value['Gene ID'].'</a></td>';
@@ -167,7 +165,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
 
                     <tbody>';
 
-                        foreach ($genetic_markers_result['result'] as $value) {
+                        foreach ($genetic_markers_result['cursor']['firstBatch'] as $value) {
                             foreach($value as $data){
                                 echo "<tr>";
                                 //echo '<td><a class="nowrap" target = "_blank" href="https://services.cbib.u-bordeaux2.fr/cobra/src/result_search_5.php?organism='.$species.'&search='.$value['Gene ID'].'">'.$value['Gene ID'].'</a></td>';
@@ -212,7 +210,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
                 echo "<th>Marker 2</th>";
                 echo'   </tr></thead><tbody>';
                 $marker_list=array();
-                foreach ($genetic_markers_result['result'] as $value) {
+                foreach ($genetic_markers_result['cursor']['firstBatch'] as $value) {
                     foreach($value as $data){
                         $marker_id=$data['Marker ID']; 
                         if (!in_array($marker_id, $marker_list)){
@@ -228,8 +226,8 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
                                     )
                                 ),
                                 array('$project'=>  array('mapping_file.QTL ID'=> 1, 'mapping_file.Map ID'=>1,'mapping_file.Marker ID'=>1,'mapping_file.Marker ID 2'=>1,'mapping_file.Start'=>1,'mapping_file.End'=>1,'_id'=> 0))
-                            ));
-                            foreach ($genetic_qtls_result['result'] as $value_qtl) {
+                            ), array('cursor' => ["batchSize" => 20]));
+                            foreach ($genetic_qtls_result['cursor']['firstBatch'] as $value_qtl) {
                                 foreach($value_qtl as $data_qtl){
                                     echo "<tr>";
                                     //echo '<td><a class="nowrap" target = "_blank" href="https://services.cbib.u-bordeaux2.fr/cobra/src/result_search_5.php?organism='.$species.'&search='.$value['Gene ID'].'">'.$value['Gene ID'].'</a></td>';
@@ -265,7 +263,7 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
                 echo "<th>Marker</th>";
                 echo'</tr></thead><tbody>';
                 $marker_list=array();
-                foreach ($genetic_markers_result['result'] as $value) {
+                foreach ($genetic_markers_result['cursor']['firstBatch'] as $value) {
                     foreach($value as $data){
 
 
@@ -288,8 +286,8 @@ if (isset($_POST['gene_ids'],$_POST['species'],$_POST['start'],$_POST['end'],$_P
                                      ),
                                 array('$project'=>  array('mapping_file.QTL ID'=> 1,'mapping_file.Trait Name'=> 1,'mapping_file.Species'=> 1,'mapping_file.HREF_QTL'=> 1, 'mapping_file.Trait Alias'=> 1,'mapping_file.Study'=>1,'_id'=> 0))
 
-                            ));
-                            foreach ($genetic_qtls_result['result'] as $value_qtl) {
+                            ), array('cursor' => ["batchSize" => 20]));
+                            foreach ($genetic_qtls_result['cursor']['firstBatch'] as $value_qtl) {
                                 foreach($value_qtl as $data_qtl){
                                     echo "<tr>";
                                     //echo '<td><a class="nowrap" target = "_blank" href="https://services.cbib.u-bordeaux2.fr/cobra/src/result_search_5.php?organism='.$species.'&search='.$value['Gene ID'].'">'.$value['Gene ID'].'</a></td>';

@@ -9,13 +9,18 @@ require '../session/control-session.php';
     new_cobra_header("../..");
     new_cobra_body(isset($_SESSION['login'])? $_SESSION['login']:False,"Quick search","section_quick_search","../..");
 
-
+    /*
+    Render objectives panel
+    */
     echo '
-    <main id="content" class="searchpage">
-        <div id="mission-objectives"><p>COBRA database provides knowledges on the viral factor(s) that determine(s) the breaking of the resistance 
+    <!--main id="content" class="searchpage">
+        <div id="mission-objectives">
+            <p>
+                COBRA database provides knowledges on the viral factor(s) that determine(s) the breaking of the resistance 
                 and evaluates the durability of the resistance conferred 
-                by the new candidate genes prior to transfer to crop species</p>
-        </div> 
+                by the new candidate genes prior to transfer to crop species.
+            </p>
+        </div--> 
         ';
 
 
@@ -30,7 +35,9 @@ require '../session/control-session.php';
     $publicationsCollection = new Mongocollection($db, "publications");
     $interactionsCollection = new Mongocollection($db, "interactions");
 
-
+    /*
+    Render search panel
+    */
     make_species_list(find_species_list($speciesCollection),"../..");
     echo '<br/>';
     echo '<br/>';
@@ -38,39 +45,43 @@ require '../session/control-session.php';
     echo '<br/>';
     echo '<br/>';
     echo '<br/>';
-  
-    echo'<div id="stats_section">
-                    <br/>
-                    <div class="panel-group" id="accordion_documents">
-                        <div class="panel panel-default">
-                            <div class="panel-heading" onclick="load_statistics(this)" >
+    make_network_list("../..");
+    echo '<br/>';
+    echo '<br/>';
+    echo '<br/>';
+    echo '<br/>';
+    echo '<br/>';
+    echo '<br/>';
 
-                                    <a class="accordion-toggle collapsed" href="#stat-table" data-parent="#accordion_documents" data-toggle="collapse">
-                                            <strong>Some statistics</strong>
-                                    </a>				
 
-                            </div>
-                            <center>
-                                <div class="statloading" style="display: none"></div>
-                            </center>
-                            <div style="color:white;" class="panel-body panel-collapse collapse" id="stat-table">';
+    /*
+    Render stats panel
+    */
+    echo'<!--div id="stats_section"-->
+        <br/>
+        <div class="panel-group" id="accordion_documents">
+            <div class="panel panel-default">
+                <div class="panel-heading" onclick="load_statistics(this)" >
 
-        
-        
-        
-        
-                                        echo'<div class="stat_area"> 
+                    <a class="accordion-toggle collapsed" href="#stat-table" data-parent="#accordion_documents" data-toggle="collapse">
+                            <strong>Statistics</strong>
+                    </a>				
 
-                                            <!--here comes the statistics  accordion div-->
-                                        </div>';
-                        echo'
-                            </div>
+                </div>
+                <center>
+                    <div class="statloading" style="display: none"></div>
+                </center>
+                <div class="panel-body panel-collapse collapse" id="stat-table">
+                    <div class="stat_area"> 
 
-                        </div>
+                        <!--here comes the statistics  accordion div-->
                     </div>
-                    <div class="shift_line"></div>
-          </div>
-        ';
+                </div>
+            </div>
+        </div>
+        <div class="shift_line"></div>
+    <!--/div-->
+    ';
 
         
 

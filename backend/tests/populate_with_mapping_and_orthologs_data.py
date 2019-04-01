@@ -11,6 +11,7 @@ from helpers.db_helpers import *
 import string
 from random import *
 
+
 # Script 
 import datetime
 if "log" not in globals():
@@ -22,9 +23,9 @@ mappings_col.drop();
 #mappings_col.drop()
 #orthologs_col.drop()
 #interactions_col.drop()
-for grid_out in fs.find({}, timeout=False):
+# for grid_out in fs.find({}, timeout=False):
 	
-	fs.delete(grid_out._id)
+# 	fs.delete(grid_out._id)
 
 
 

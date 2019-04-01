@@ -62,13 +62,6 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
         array('$project' => array('mapping_file'=>1,'_id'=>0)),
         array('$unwind'=>'$mapping_file'),
         array('$match' => array('$or'=> array(
-            // array('mapping_file.Plaza ID'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
-            // array('mapping_file.Alias'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Probe ID'=>new MongoRegex("/^$search/xi")),
-            // array('mapping_file.Protein ID'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Protein ID 2'=>new MongoRegex("/^$search/xi")),
-            //array('mapping_file.Transcript ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),
             array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),
@@ -150,11 +143,6 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
                 
                 
             }
-//            if (isset($result['mapping_file']['Protein ID']) && $result['mapping_file']['Protein ID']!='' && $result['mapping_file']['Protein ID']!='NA'){
-//                if (in_array($result['mapping_file']['Protein ID'],$protein_id)==FALSE){
-//                    array_push($protein_id,$result['mapping_file']['Protein ID']);
-//                }
-//            }
             if (isset($result['mapping_file']['Description'])&& $result['mapping_file']['Description']!='' && $result['mapping_file']['Description']!='NA'){
                 if (in_array($result['mapping_file']['Description'],$descriptions)==FALSE){
                     array_push($descriptions,$result['mapping_file']['Description']);
@@ -311,21 +299,13 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
                         array_push($transcript_id,$id);
                     }
                 }
-
-                
             } 
-            
-            //if (isset($result['species'])&& $result['species']!='' && $result['species']!='NA'){
-              //  $species=$result['species']; 
-            //}
-
-
         }
         
         
             
 
-         //////////////////////////////////////////
+        ///////////////////////////////////////////
         //DISPLAY RESULT HTML//
         //////////////////////////////////////////  
         echo'<div id="summary">';  
@@ -337,36 +317,7 @@ if ((isset($_GET['organism'])  && $_GET['organism']!='' && $_GET['organism']!='N
                     load_and_display_proteins_details($gene_id,$gene_id_bis,$gene_symbol,$gene_alias,$descriptions,$uniprot_id,$species,$score_exp,$score_int,$score_ort,$score_QTL,$score_SNP,$score,$gene_start,$gene_end,$chromosome);
                     load_and_display_expression_profile_with_ajax($gene_id,$transcript_id,$protein_id,$gene_id_bis,$gene_alias,$species);
                     load_and_display_gene_ontology_terms($GOCollection,$go_id_list);                  
-                    load_and_display_variations_result_with_ajax($gene_id,$species,$gene_start,$gene_end,$chromosome); 
-                    
-                    
-//                    $genetic_markers_result=$genetic_markers_collection->aggregate(array(  
-//                        array('$project' => array('mapping_file'=>1,'_id'=>0)),
-//                        array('$unwind'=>'$mapping_file'),
-//                        array('$match' => array('$and'=> array(
-//                                                        array('mapping_file.Start'=>array('$gt'=> 9509163 )),
-//                                                        array('mapping_file.Start'=>array('$lt'=> 9517485)),
-//                                                        array('mapping_file.End'=>array('$gt'=> 9509163 )),
-//                                                        array('mapping_file.End'=>array('$lt'=> 9517485 )),
-//                                                        array('mapping_file.Chromosome'=> 'scaffold_1' )
-//                                                           )
-//                                                        )),
-//                        array('$project'=>  array('mapping_file.Marker ID'=> 1, 'mapping_file.HREF_markers'=> 1,'mapping_file.HREF_species'=> 1,'mapping_file.Species'=>1,'mapping_file.Start'=>1,'mapping_file.End'=>1,'mapping_file.Map ID'=>1,'mapping_file.Chromosome'=>1,'mapping_file.Type'=>1,'mapping_file.Linkage Group'=>1,'mapping_file.StartcM'=>1,'_id'=> 0))
-//
-//                    ));
-//                    var_dump($genetic_markers_result);
-//                    foreach ($genetic_markers_result['result'] as $value) {
-//                        foreach ($value['mapping_file'] as $value_tocheck) {
-//                           echo $value_tocheck; 
-//                        }
-//
-//                    }
-                    
-                    
-                    
-                    
-                    
-                    //load_and_display_variations_result($genetic_markers_collection,$qtl_collection,$full_mappingsCollection,$variation_collection,$gene_id,$species,$gene_start,$gene_end,$chromosome);                    
+                    load_and_display_variations_result_with_ajax($gene_id,$species,$gene_start,$gene_end,$chromosome);                    
                     load_and_display_external_references($uniprot_id,$search,$species);
                     
             echo'</div>';

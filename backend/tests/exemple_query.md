@@ -15,9 +15,6 @@ from helpers.db_helpers import *
 * Find all available datasets
 
 ```python
-
-
-
 cursor_to_table(samples_col.find({},{"name":1}))
 ```
 
@@ -56,7 +53,7 @@ cursor_to_table(species_col.find({},{"_id":1,"full_name":1,"taxid":1,"abbrev_nam
 * Get all viruses
 
 ```python
-cursor_to_table(species_col.find({"classification.top_level":"viruses"},{"_id":1,"full_name":1,"taxid":1,"abbrev_name":1,"aliases":1,"classification.top_level":1,"classification.kingdom":1,"classification.order":1}))
+cursor_to_table(viruses_col.find({"classification.top_level":"viruses"},{"_id":1,"full_name":1,"taxid":1,"abbrev_name":1,"aliases":1,"classification.top_level":1,"classification.kingdom":1,"classification.order":1}))
 
 ```
 
@@ -266,15 +263,45 @@ for xp in all_xp:
 * Get an issue tracker for data set interpretation. E.g. :
 	* for [C. melo infection](#Transcriptomics of infection of C. melo), the values are "fold change" or "log(fold change)?"
 
-
+```python
 $pp_intact_fields=array(array('$match' => array('origin'=>'BIOGRID')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields);
-                    $total_ppi_intact=0;
-                    foreach ($cursor_ppi_intact['result'] as $value) {
-                        foreach ($value['mapping_file'] as $mapping_file) {
-                            $total_ppi_intact++;
-                        }
+$cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields);
+$total_ppi_intact=0;
+foreach ($cursor_ppi_intact['result'] as $value) {
+    foreach ($value['mapping_file'] as $mapping_file) {
+        $total_ppi_intact++;
+    }
 
-                    }
-                    
-                    $stat_string.= '<h4>Number of Intact plant plant interactions: '.$total_ppi_intact.'</h4>';
+}                    
+$stat_string.= '<h4>Number of Intact plant plant interactions: '.$total_ppi_intact.'</h4>';
+```
+
+
+* Show collection keys (col = mappings_col)
+```python
+test = full_mappings_col.find_one()
+for i in test:
+	if(i == "mapping_file"):
+		test[i]
+
+list(full_mappings_col.find({"species":"Arabidopsis thaliana", "mapping_file.Gene ID": { "$regex": "/^$search/", "$options": "xi"}},{"mapping_file.Gene ID":1}))
+
+
+```
+```php
+        array('$match' => array('type'=>'full_table','species'=>$species)),  
+        array('$project' => array('mapping_file'=>1,'_id'=>0)),
+        array('$unwind'=>'$mapping_file'),
+        array('$match' => array('$or'=> array(
+            array('mapping_file.Uniprot ID'=>new MongoRegex("/^$search/xi")),
+            array('mapping_file.Gene ID'=>new MongoRegex("/^$search/xi")),
+            array('mapping_file.Gene ID'=>new MongoRegex("/$search$/xi")),
+            array('mapping_file.Symbol'=>new MongoRegex("/^$search/xi")),
+            array('mapping_file.Gene ID 2'=>new MongoRegex("/^$search/xi"))))),
+        array('$project' => array("mapping_file"=>1,'_id'=>0))
+```
+
+```mongo
+db.full_mappings.find({"species":"Arabidopsis thaliana", "mapping_file.Gene ID": { $regex: /^ATCG01100/, $options: 'xi' }},{"mapping_file.Gene ID":1, "mapping_file.Description":1})
+```
+

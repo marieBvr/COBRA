@@ -60,66 +60,31 @@ function go($stanza,$go_term_id){
 
 function run_blast($tmp="null"){
     
-    foreach (glob("/data/applications/ncbi-blast-2.*+") as $value) {
-        $blast_dir=$value;
-        //error_log($blast_dir);
-    }
-    $query_file="$blast_dir/tmp/$tmp.fasta";
-    
-    
-    
-    
-    
-    
-//    if ($mode === "json"){
-//        
-//        $result_file = "/data/applications/ncbi-blast-2.2.31+/tmp/$tmp.txt";
-//        $output = shell_exec("/data/applications/ncbi-blast-2.2.31+/bin/blastx -query $query_file -db /data/applications/ncbi-blast-2.2.31+/db/cobra_blast_proteome_db -out $result_file -outfmt 13");
-//        $res = json_decode(file_get_contents($result_file.'_1.json'), true);
-//        
-//    }
-//    else if($mode === "asn"){
-    
-    
-    $result_file = "$blast_dir/tmp/$tmp.txt";
-    $html_result_file = "$blast_dir/tmp/$tmp.html";
-    $tab_result_file = "$blast_dir/tmp/$tmp.tsv";
-    $output = shell_exec("$blast_dir/bin/blastx -query $query_file -db $blast_dir/db/cobra_blast_proteome_db -outfmt 11 -out $result_file");
+    // foreach (glob("/home/marie/ncbi-blast-2.*+") as $value) {
+    //     $blast_dir=$value;
+    //     //error_log($blast_dir);
+    // }
+    $blast_dir="/usr/share/nginx/html/backend/ncbi-blast-2.2.31+";
+    $tmp_dir="/tmp/systemd-private-9c2d378ebd194b7a9f28797629aa467c-php-fpm.service-VVIFE1";
+    $query_file="$tmp_dir/tmp/$tmp.fasta";   
+    $result_file = "$tmp_dir/tmp/$tmp.txt";
+    $html_result_file = "$tmp_dir/tmp/$tmp.html";
+    $tab_result_file = "$tmp_dir/tmp/$tmp.tsv";
+    $output = shell_exec("blastx -query $query_file -db $blast_dir/db/cobra_blast_proteome_db -outfmt 11 -out $result_file > /tmp/blast.log 2>&1&");
+    shell_exec("echo $output");
+    error_log("message");
     $output_html_reformat = shell_exec("$blast_dir/bin/blast_formatter -out $html_result_file -archive $result_file -html");
     $output_tab_reformat = shell_exec("$blast_dir/bin/blast_formatter -out $tab_result_file -archive $result_file -outfmt \"6 qseqid sseqid pident evalue \"");
-
-
     $html = file_get_contents($html_result_file);
     $tab_format=file_get_contents($tab_result_file);
-        
-//    }
-//    else{
-//        $result_file = "/data/applications/ncbi-blast-2.2.31+/tmp/$tmp.html";
-//        $output = shell_exec("/data/applications/ncbi-blast-2.2.31+/bin/blastx -query $query_file -db /data/applications/ncbi-blast-2.2.31+/db/cobra_blast_proteome_db -html -out $result_file");
-//        $res = file_get_contents($result_file);
-//
-//        
-//    }
+
     unlink($query_file);
     //error_log($tab_format);
     return array($html,$tab_format);
 }
+
 function make_experiment_type_list($cursor){
 
-
-	/*
-	$array = iterator_to_array($cursor);
-    $keys =array();
-    
-    foreach ($array as $k => $v) {
-            foreach ($v as $a => $b) {
-                $keys[] = $a;
-            }
-    }
-    $keys = array_values(array_unique($keys));
-
-    //Debut du corps de la liste
-    */
     echo '<label for="species">experiment type</label>';
 
     echo '<select class="form-control" id="exp_typeID" name="exp_typeID">';
@@ -548,8 +513,8 @@ function display_statistics_with_ajax(){
                 
                 }
                 $stat_string.='</tbody></table>';
-                $stat_string.='<div class="shift_line"/>';
- $stat_string.='</div>';
+                // $stat_string.='<div class="shift_line"/>';
+                $stat_string.='</div>';
                 $stat_string.='<div id="transtat" class="col-md-5" >';
                 $stat_string.='<h2> Interactomics </h2>';
                 $stat_string.='<table class="table">
@@ -561,7 +526,7 @@ function display_statistics_with_ajax(){
                   </thead>
                   <tbody>';
                 $pv_fields=array(array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 10]));
+                $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 100]));
                 //var_dump($cursor_ppi);
                 $total_pvi=0;
                 foreach ($cursor_pvi['cursor']['firstBatch'] as $value) {
@@ -577,7 +542,7 @@ function display_statistics_with_ajax(){
                 // $stat_string.= '<h4>Plant-Virus [HPIDB + Literature] interactions: '.$total_pvi.'</h4>';
 
                 $pp_biogrid_fields=array(array('$match' => array('origin'=>'BIOGRID')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 10]));
+                $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 20]));
                 $total_ppi_biogrid=0;
                 foreach ($cursor_ppi_biogrid['cursor']['firstBatch'] as $value) {
                     foreach ($value['mapping_file'] as $mapping_file) {
@@ -592,7 +557,7 @@ function display_statistics_with_ajax(){
                 </tr>';
                 // $stat_string.= '<h4>Biogrid Plant-Plant interactions: '.$total_ppi_biogrid.'</h4>';
                 $pp_intact_fields=array(array('$match' => array('origin'=>'INTACT')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 10]));
+                $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 20]));
                 $total_ppi_intact=0;
                 foreach ($cursor_ppi_intact['cursor']['firstBatch'] as $value) {
                     foreach ($value['mapping_file'] as $mapping_file) {
@@ -605,10 +570,10 @@ function display_statistics_with_ajax(){
                     <td>Intact Plant-Plant</td>
                     <td>'.$total_ppi_intact.'</td>
                 </tr></tbody></table>';
-                // $stat_string.= '<h4>Intact Plant-Plant interactions: '.$total_ppi_intact.'</h4>';
-                $stat_string.='<h2> Overview </h2>';
+                // $stat_string.= '<h4>Intact Plant-Plant interactions: '.$total_ppi_intact.'</h4>';                
                 $stat_string.='</div>';
-                $stat_string.='<div id="transtat" class="col-md-2" >';
+                $stat_string.='<div id="transtat" class="col-md-5" >';
+                $stat_string.='<h2> Overview </h2>';
                 $stat_string.='<table class="table">
                   <thead>
                     <tr>
@@ -627,7 +592,7 @@ function display_statistics_with_ajax(){
 
                 $cursor_species=$speciesCollection->aggregate(array(
                     array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                ), array('cursor' => ["batchSize" => 10]));
+                ), array('cursor' => ["batchSize" => 20]));
                 // $stat_string.='<h4>Species per top_level</h4>';
                 foreach ($cursor_species['cursor']['firstBatch'] as $doc){
                     $stat_string.='<tr>
@@ -645,7 +610,7 @@ function display_statistics_with_ajax(){
                 </tr>';
                 $cursor_virus=$virusCollection->aggregate(array(
                 array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                ), array('cursor' => ["batchSize" => 10]));
+                ), array('cursor' => ["batchSize" => 20]));
                 // $stat_string.='<h4> Pathogens per top_level</h4>';
                 foreach ($cursor_virus['cursor']['firstBatch'] as $doc){
                     $stat_string.='<tr>
@@ -657,8 +622,8 @@ function display_statistics_with_ajax(){
                 }
                 $stat_string.= '</tbody></table>';
                 $stat_string.='</div>';
-                $stat_string.='</div>';
                 $stat_string.='</div>';     
+                $stat_string.='</div>';
                 echo $stat_string;
  
 }
@@ -682,7 +647,7 @@ function display_statistics(){
                     <h4>Normalized measures : '.$measurementsCollection->count().'</h4>';
                     
                     $pv_fields=array(array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 10]));
+                    $cursor_pvi=$pv_interactionsCollection->aggregate($pv_fields, array('cursor' => ["batchSize" => 20]));
                     //var_dump($cursor_ppi);
                     $total_pvi=0;
                     foreach ($cursor_pvi['cursor']['firstBatch'] as $value) {
@@ -694,7 +659,7 @@ function display_statistics(){
                     $stat_string.= '<h4>Plant-Virus [HPIDB + Literature] interactions: '.$total_pvi.'</h4>';
                     
                     $pp_biogrid_fields=array(array('$match' => array('origin'=>'BIOGRID')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 10]));
+                    $cursor_ppi_biogrid=$pp_interactionsCollection->aggregate($pp_biogrid_fields, array('cursor' => ["batchSize" => 20]));
                     $total_ppi_biogrid=0;
                     foreach ($cursor_ppi_biogrid['cursor']['firstBatch'] as $value) {
                         foreach ($value['mapping_file'] as $mapping_file) {
@@ -705,7 +670,7 @@ function display_statistics(){
                     
                     $stat_string.= '<h4>Biogrid Plant-Plant interactions: '.$total_ppi_biogrid.'</h4>';
                     $pp_intact_fields=array(array('$match' => array('origin'=>'INTACT')),array('$project' => array('mapping_file'=>1,'_id'=>0)));
-                    $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 10]));
+                    $cursor_ppi_intact=$pp_interactionsCollection->aggregate($pp_intact_fields, array('cursor' => ["batchSize" => 20]));
                     $total_ppi_intact=0;
                     foreach ($cursor_ppi_intact['cursor']['firstBatch'] as $value) {
                         foreach ($value['mapping_file'] as $mapping_file) {
@@ -721,7 +686,7 @@ function display_statistics(){
 
                     $cursor_species=$speciesCollection->aggregate(array(
                         array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                    ), array('cursor' => ["batchSize" => 10]));
+                    ), array('cursor' => ["batchSize" => 20]));
                     $stat_string.='<h4>Species per top_level</h4>';
                     foreach ($cursor_species['cursor']['firstBatch'] as $doc){
                             $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
@@ -729,7 +694,7 @@ function display_statistics(){
                     $stat_string.= '<h4>Viruses : '.$virusCollection->count().'</h4>';
                     $cursor_virus=$virusCollection->aggregate(array(
                     array('$group'=>array('_id'=>'$classification.top_level','count'=>array('$sum'=>1)))
-                    ), array('cursor' => ["batchSize" => 10]));
+                    ), array('cursor' => ["batchSize" => 20]));
                     $stat_string.='<h4> Pathogens per top_level</h4>';
                     foreach ($cursor_virus['cursor']['firstBatch'] as $doc){
                             $stat_string.='<p>a/ '.$doc['_id'].' count: '.$doc['count'].'</p>';
@@ -1259,64 +1224,45 @@ function load_and_display_proteins_details(array $gene_id, array $gene_id_bis,ar
    echo'<div id="section_description"><B>';
         echo'</br>';
         if (isset($gene_id[0])){echo $gene_id[0];}else{echo $gene_id_bis[0];} echo '</B> ';
-//                for ($i = 0; $i < $score_exp; $i++) { 
-//                   echo '<i class="fa fa-star" id="score_exp"></i>';
-//                }
-//                for ($i = 0; $i < $score_int; $i++) { 
-//                   echo '<i class="fa fa-star" id="score_int"></i>';
-//                }
-//                for ($i = 0; $i < $score_ort; $i++) { 
-//                   echo '<i class="fa fa-star" id="score_ort"></i>';
-//                }
-//                for ($i = 0; $i < $score_QTL; $i++) { 
-//                   echo '<i class="fa fa-star" id="score_QTL"></i>';
-//                }
-//                for ($i = 0; $i < $score_SNP; $i++) { 
-//                   echo '<i class="fa fa-star" id="score_SNP"></i>';
-//                }
-                
-                
-                
+            echo '<!-- Button trigger modal -->
+                    <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#myModal">
+                      View score details
+                    </button>
 
-                echo '<!-- Button trigger modal -->
-                        <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#myModal">
-                          View score details
-                        </button>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="myModalLabel">Contribution to the score</h4>
-                              </div>
-                              <div class="modal-body">
-                                <div id="container_pie"  data-exp="'.$score_exp.'" data-int="'.$score_int.'" data-ort="'.$score_ort.'" data-QTL="'.$score_QTL.'" data-SNP="'.$score_SNP.'" style=" height: 300px; max-width: 100%; margin: 0 auto"></div>   
-                              </div>
-                              <div class="modal-header">
-                                    <h4 class="modal-title" id="myModalLabel">Score details</h4>
-                                    <p> this pie chart shows contribution of each omics field into the score computation</p> 
-                                    
-                                </div>
-                              <div class="modal-header">
-                                    <h4 class="modal-title" id="myModalLabel">Score values</h4>
-                                    <p> <ul>
-                                        <li> Score for over/under expression in infected condition: '.$score_exp.'  </li>
-                                        <li> Score for interactions with viral proteins : '.$score_int.'   </li>
-                                        <li> Score for orthology with a candidate genes : '.$score_ort.'   </li>
-                                        <li> Score for beeing located into resistance QTL : '.$score_QTL.'   </li>
-                                        <li> Score for significant genotype marker (SNP) : '.$score_SNP.'   </li>                                       
-                                    </ul></p> 
-                                    
-                                </div>  
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <!--<button type="button" class="btn btn-primary">Save changes</button>-->
-                              </div>
-                            </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Contribution to the score</h4>
                           </div>
-                        </div>';
+                          <div class="modal-body">
+                            <div id="container_pie"  data-exp="'.$score_exp.'" data-int="'.$score_int.'" data-ort="'.$score_ort.'" data-QTL="'.$score_QTL.'" data-SNP="'.$score_SNP.'" style=" height: 300px; max-width: 100%; margin: 0 auto"></div>   
+                          </div>
+                          <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel">Score details</h4>
+                                <p> this pie chart shows contribution of each omics field into the score computation</p> 
+                                
+                            </div>
+                          <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel">Score values</h4>
+                                <p> <ul>
+                                    <li> Score for over/under expression in infected condition: '.$score_exp.'  </li>
+                                    <li> Score for interactions with viral proteins : '.$score_int.'   </li>
+                                    <li> Score for orthology with a candidate genes : '.$score_ort.'   </li>
+                                    <li> Score for beeing located into resistance QTL : '.$score_QTL.'   </li>
+                                    <li> Score for significant genotype marker (SNP) : '.$score_SNP.'   </li>                                       
+                                </ul></p> 
+                                
+                            </div>  
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+                          </div>
+                        </div>
+                      </div>
+                    </div>';
                 
                 
                 
@@ -1966,7 +1912,7 @@ function load_and_display_gene_ontology_terms(MongoCollection $go_collection, ar
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <a class="accordion-toggle collapsed" href="#go_process" data-parent="#accordion_documents_go_process" data-toggle="collapse">
-                            <strong>Biological Process </strong> ('.  count($total_go_biological_process).')
+                            <strong>Biological Process </strong> ( '.  count($total_go_biological_process).')
                         </a>				
                     </div>
                     <div class="panel-body panel-collapse collapse" id="go_process">
@@ -2120,7 +2066,7 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
 
     
     $interaction_array=get_intact_plant_plant_interactor($proteins_id,$interactionsCollection,$species);
-    $hits_number_intact= count($interaction_array['result']);
+    $hits_number_intact= count($interaction_array['cursor']['firstBatch']);
     $result_found=False;
     if ($hits_number_intact>0){
         $result_found=True;
@@ -2140,7 +2086,7 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
                         <div class="pp_interaction">';
                             $intact_headers=array('EBI ref','Alias','Uniprot','Pubmed','Author','detection_method','Organism','interaction_type','source_database_id','interaction_identifier');
                             $intact_values=array();
-                            foreach ($interaction_array['result'] as $value) {
+                            foreach ($interaction_array['cursor']['firstBatch'] as $value) {
                                 
                                 
                                 foreach ($value as $data) {
@@ -2274,7 +2220,7 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
     }
    
     $biogrid_array=get_biogrid_plant_plant_interactor($gene_id,$interactionsCollection,$species); 
-    $hits_number_biogrid= count($biogrid_array['result']);
+    $hits_number_biogrid= count($biogrid_array['cursor']['firstBatch']);
     $biogrid_headers=array('Gene Id','Official symbol','Aliases','Experimental SYSTEM','Author','Pubmed','Organism');
     $biogrid_values=array();
     if ($hits_number_biogrid>0){
@@ -2295,7 +2241,7 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
                             <div class="pp_interaction">';
                             
                             
-                            foreach ($biogrid_array['result'] as $value) {
+                            foreach ($biogrid_array['cursor']['firstBatch'] as $value) {
                                 
                                 $species= $value['species'];
                                 
@@ -2355,7 +2301,7 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
     $string_headers=array('Transcript Id','Combined score','Organism');
     $string_values=array();
     
-    foreach ($string_array['result'] as $value) {
+    foreach ($string_array['cursor']['firstBatch'] as $value) {
 
         //$species= $value['species'];
 
@@ -2611,7 +2557,7 @@ function load_and_display_ppinteractions_with_ajax($full_mappingsCollection,$gen
                             <div class="pp_interaction">';
                             
                             
-                            foreach ($biogrid_array['result'] as $value) {
+                            foreach ($biogrid_array['cursor']['firstBatch'] as $value) {
                                 
                                 $species= $value['species'];
                                 
@@ -2763,7 +2709,7 @@ function load_and_display_pvinteractions(array $gene_id, array $proteins_id, Mon
     
     $result=get_hpidb_plant_virus_interactor($proteins_id,$interactionsCollection,$species); 
     
-    $hits_number_hpidb= count($result['result']);
+    $hits_number_hpidb= count($result['cursor']['firstBatch']);
     $result_found=False;
     if ($hits_number_hpidb>0){
         $result_found=True;
@@ -2780,99 +2726,95 @@ function load_and_display_pvinteractions(array $gene_id, array $proteins_id, Mon
                     <div class="panel-body panel-collapse collapse" id="hpidb2">';
 
                   echo' <div class="pv_interaction">';
-                            $headers=array('Database identifier','Protein alias','Uniprot','Pubmed','Author','Pathogen','Detection_method');
-                            $values=array();
-                            foreach ($result['result'] as $value) {
-                                
-                                
-                                foreach ($value as $data) {
-                                    
-                                    //HREF_DB_ID
-                                    $href_db_id="";
-                                    if (strstr($data['database_identifier'],"|")){
-                                        $split_db_id=explode("|", $data['database_identifier']);
-                                        foreach ($split_db_id as $db_id) {
-                                            $split_id=explode(":", $db_id);
-                                            $href_db_id.=' <a href="http://www.ebi.ac.uk/intact/interaction/'.$split_id[1].'">'.$split_id[1].'</a> ';
-                                        }                                        
-                                    }
-                                    else{
-                                        $split_id=explode(":", $data['database_identifier']);
-                                        $href_db_id.=' <a href="http://www.ebi.ac.uk/intact/interaction/'.$split_id[1].'">'.$split_id[1].'</a> ';
-
-                                    }
-                                    array_push($values, $href_db_id);
-                                    
-
-                                    //ALIAS
-                                    $alias_string="";
-                                    $already_in=array();
-                                    if (strstr($data['protein_alias_2'],"|")){
-                                        $aliases=explode("|", $data['protein_alias_2']);
-                                        $alias_counter=0;
-                                        foreach ($aliases as $alias) {
-                                           
-                                            $short=explode(":", $alias);
-                                            $name=explode("(", $short[1]);
-                                            if (!in_array($name[0], $already_in)){
-                                                if ($alias_counter===count($aliases)-1){
-                                                    $alias_string.=$name[0];
-                                                }
-                                                else{
-                                                    $alias_string.=$name[0].",";
-                                                }                                   
-                                                array_push($already_in, $name[0]);
-                                            } 
-                                        }
-                                    }
-                                    else{
-                                       $short=explode(":", $data['protein_alias_2']);
-                                       $name=explode("(", $short[1]);
-                                       $alias_string.=$name[0]." ";
-                                    }
-                                    
-                                    
-                                    array_push($values, $alias_string);
-                                    
-                                    //UNIPROT
-                                    $href_uniprot='<a href="http://www.uniprot.org/uniprot/'.$data['Virus Uniprot ID'].'">'.$data['Virus Uniprot ID'].'</a>';
-                                    array_push($values, $href_uniprot);
-                                    
-                                    //PUBMED ID
-                                    $href_pmid='<a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$data['pmid'].'">'.$data['pmid'].'</a>';
-                                    array_push($values, $href_pmid);
-                                    
-                                    //AUTHOR NAME
-                                    array_push($values, $data['author_name']);
-                                    //VIRUS NAME
-                                    array_push($values, $data['virus']);
-
-                                    //DETECTION METHOD
-                                    $id_string_method="";
-                                    $split_method=explode('psi-mi:', $data['detection_method']);
-                                    $split_method_bis=explode('(', $split_method[1]);
-                                    $split_method_ter=explode(')', $split_method_bis[1]);
-                                    $method_name=$split_method_ter[0];
-                                    $id_method=$split_method_bis[0];
-                                    $id_string_method.=' <a href="http://www.ebi.ac.uk/ontology-lookup/?termId='.$id_method.'"> '.$id_method.' </a> ';
-                                    $id_string_method.= '('.$method_name.')';
-                                    array_push($values, $id_string_method);
-
-                                }
+                    $headers=array('Database identifier','Protein alias','Uniprot','Pubmed','Author','Pathogen','Detection_method');
+                    $values=array();
+                    foreach ($result['cursor']['firstBatch'] as $value) {
+                        foreach ($value as $data) {
+                            
+                            //HREF_DB_ID
+                            $href_db_id="";
+                            if (strstr($data['database_identifier'],"|")){
+                                $split_db_id=explode("|", $data['database_identifier']);
+                                foreach ($split_db_id as $db_id) {
+                                    $split_id=explode(":", $db_id);
+                                    $href_db_id.=' <a href="http://www.ebi.ac.uk/intact/interaction/'.$split_id[1].'">'.$split_id[1].'</a> ';
+                                }                                        
+                            }
+                            else{
+                                $split_id=explode(":", $data['database_identifier']);
+                                $href_db_id.=' <a href="http://www.ebi.ac.uk/intact/interaction/'.$split_id[1].'">'.$split_id[1].'</a> ';
 
                             }
-                            pretty_table($headers, $values, "pv_hpidb");
+                            array_push($values, $href_db_id);
                             
-                            
-                   echo'</div>';
 
-               echo'</div>'
-             . '</div>'
-         . '</div>';
+                            //ALIAS
+                            $alias_string="";
+                            $already_in=array();
+                            if (strstr($data['protein_alias_2'],"|")){
+                                $aliases=explode("|", $data['protein_alias_2']);
+                                $alias_counter=0;
+                                foreach ($aliases as $alias) {
+                                   
+                                    $short=explode(":", $alias);
+                                    $name=explode("(", $short[1]);
+                                    if (!in_array($name[0], $already_in)){
+                                        if ($alias_counter===count($aliases)-1){
+                                            $alias_string.=$name[0];
+                                        }
+                                        else{
+                                            $alias_string.=$name[0].",";
+                                        }                                   
+                                        array_push($already_in, $name[0]);
+                                    } 
+                                }
+                            }
+                            else{
+                               $short=explode(":", $data['protein_alias_2']);
+                               $name=explode("(", $short[1]);
+                               $alias_string.=$name[0]." ";
+                            }
+                            
+                            
+                            array_push($values, $alias_string);
+                            
+                            //UNIPROT
+                            $href_uniprot='<a href="http://www.uniprot.org/uniprot/'.$data['Virus Uniprot ID'].'">'.$data['Virus Uniprot ID'].'</a>';
+                            array_push($values, $href_uniprot);
+                            
+                            //PUBMED ID
+                            $href_pmid='<a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$data['pmid'].'">'.$data['pmid'].'</a>';
+                            array_push($values, $href_pmid);
+                            
+                            //AUTHOR NAME
+                            array_push($values, $data['author_name']);
+                            //VIRUS NAME
+                            array_push($values, $data['virus']);
+
+                            //DETECTION METHOD
+                            $id_string_method="";
+                            $split_method=explode('psi-mi:', $data['detection_method']);
+                            $split_method_bis=explode('(', $split_method[1]);
+                            $split_method_ter=explode(')', $split_method_bis[1]);
+                            $method_name=$split_method_ter[0];
+                            $id_method=$split_method_bis[0];
+                            $id_string_method.=' <a href="http://www.ebi.ac.uk/ontology-lookup/?termId='.$id_method.'"> '.$id_method.' </a> ';
+                            $id_string_method.= '('.$method_name.')';
+                            array_push($values, $id_string_method);
+
+                        }
+
+                    }
+                    pretty_table($headers, $values, "pv_hpidb");      
+                   echo'</div><i class="glyphicon glyphicon-eye-open">coucou</i>';
+
+               echo'</div>
+               </div>
+           </div>';
                
     }
     $result2=get_litterature_plant_virus_interactor($gene_id,$interactionsCollection,$species); 
-    $hits_number_litterature= count($result2['result']);
+    $hits_number_litterature= count($result2['cursor']['firstBatch']);
     if ($hits_number_litterature>0){
         $result_found=True;
     echo'<div class="panel-group" id="accordion_documents_litterature">
@@ -2891,21 +2833,14 @@ function load_and_display_pvinteractions(array $gene_id, array $proteins_id, Mon
 
                         $headers=array('Virus_symbol','Method','Reference','Virus','Host');
                         $values=array();
-                        foreach ($result2['result'] as $value) {
+                        foreach ($result2['cursor']['firstBatch'] as $value) {
                             foreach ($value as $data) {
-
-
-
-
                                array_push($values, $data['Virus_symbol']); 
                                array_push($values, $data['method']);
                                array_push($values, $data['Reference']);
                                array_push($values, $data['virus']);
                                array_push($values, $data['species']);
-
-
                             }
-
                         }
                         pretty_table($headers, $values, "pv_litterature");
                echo'</div>';
@@ -2915,15 +2850,14 @@ function load_and_display_pvinteractions(array $gene_id, array $proteins_id, Mon
         </div>';
     
     }
-    return $result_found;
-    
-    
+    return $result_found;    
 }
+
 function load_and_display_pvinteractions_with_ajax(array $gene_id, array $proteins_id, MongoCollection $interactionsCollection,$species='null'){
     
     $result=get_hpidb_plant_virus_interactor($proteins_id,$interactionsCollection,$species); 
     
-    $hits_number_hpidb= count($result['result']);
+    $hits_number_hpidb= count($result['cursor']['firstBatch']);
     
     if ($hits_number_hpidb>0){
         echo'
@@ -2941,7 +2875,7 @@ function load_and_display_pvinteractions_with_ajax(array $gene_id, array $protei
                   echo' <div class="pv_interaction">';
                             $headers=array('Database identifier','Protein alias','Uniprot','Pubmed','Author','Pathogen','Detection_method');
                             $values=array();
-                            foreach ($result['result'] as $value) {
+                            foreach ($result['cursor']['firstBatch'] as $value) {
                                 
                                 
                                 foreach ($value as $data) {
@@ -3031,7 +2965,7 @@ function load_and_display_pvinteractions_with_ajax(array $gene_id, array $protei
                
     }
     $result2=get_litterature_plant_virus_interactor($gene_id,$interactionsCollection,$species); 
-    $hits_number_litterature= count($result2['result']);
+    $hits_number_litterature= count($result2['cursor']['firstBatch']);
     if ($hits_number_litterature>0){
     echo'<div class="panel-group" id="accordion_documents_litterature">
             <div class="panel panel-default">
@@ -3049,7 +2983,7 @@ function load_and_display_pvinteractions_with_ajax(array $gene_id, array $protei
 
                         $headers=array('Virus_symbol','Method','Reference','Virus','Host');
                         $values=array();
-                        foreach ($result2['result'] as $value) {
+                        foreach ($result2['cursor']['firstBatch'] as $value) {
                             foreach ($value as $data) {
 
 
@@ -3150,15 +3084,6 @@ function load_and_display_sequences_data($sequencesCollection,$gene_id,$gene_id_
 
                         </div>
                     </div>';
-             
-//                    $timeend=microtime(true);
-//                    $time=$timeend-$timestart;
-//                    //Afficher le temps d'éxecution
-//                    $page_load_time = number_format($time, 3);
-//                    echo "Debut du script: ".date("H:i:s", $timestart);
-//                    echo "<br>Fin du script: ".date("H:i:s", $timeend);
-//                    echo "<br>Script for sequences 2 executed in " . $page_load_time . " sec"; 
-//                    $timestart=microtime(true);
               echo '<div class="panel-group" id="accordion_documents_gene_sequence">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -3290,52 +3215,40 @@ function load_and_display_interactions($full_mappingsCollection,$gene_id,$unipro
     load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$uniprot_id,$transcript_id,$pp_interactionsCollection,$species);
     echo'</div>';
 }
-function load_and_display_interactions_with_ajax($gene_id,$uniprot_id,$transcript_id,$species){
-    
-  
-    #echo'<div id="interaction_section">
-              #<h3>Interaction</h3>';
-    
-    
-    #load_and_display_pvinteractions_with_ajax($gene_id,$uniprot_id,$species);
-    
-    
-    
-    #load_and_display_ppinteractions_with_ajax($gene_id,$uniprot_id,$transcript_id,$species);
-    #echo'</div>';
+function load_and_display_interactions_with_ajax($gene_id,$uniprot_id,$transcript_id,$species=null,$path="./"){
     
     echo'<div id="interaction_section">
-                <h3>Interaction</h3>';
+            <h3>Interaction</h3>';
 
-                    echo '<div class="shift_line"></div>
-                    
+                echo '<div class="shift_line"></div>
+                
 
-                    <div class="panel-group" id="accordion_documents_pv_'.$gene_id[0].'">
-                        <div class="panel panel-default">
-                            <div class="panel-heading" onclick="load_pv_interaction(this)" data-mode="PV" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'">
+                <div class="panel-group" id="accordion_documents_pv_'.$gene_id[0].'">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" onclick="load_pv_interaction(this,\''.$path.'\')" data-mode="PV" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'">
 
-                                    <a class="accordion-toggle collapsed" href="#pv-table_'.$gene_id[0].'" data-parent="#accordion_documents_pv_'.$gene_id[0].'" data-toggle="collapse">
-                                            <strong>Plant Virus Interaction</strong>
-                                    </a>				
-
-                            </div>
-                            <center>
-                                <div class="PVloading_'.$gene_id[0].'" style="display: none"></div>
-                            </center>
-                            <div class="panel-body panel-collapse collapse" id="pv-table_'.$gene_id[0].'">
-                                <div class="pv_interaction_area"> 
-
-                                <!--here comes the pv interaction accordion div-->
-                                </div>';
-                       echo'</div>
+                                <a class="accordion-toggle collapsed" href="#pv-table_'.$gene_id[0].'" data-parent="#accordion_documents_pv_'.$gene_id[0].'" data-toggle="collapse">
+                                        <strong>Plant Virus Interaction</strong>
+                                </a>				
 
                         </div>
+                        <center>
+                            <div class="PVloading_'.$gene_id[0].'" style="display: none"></div>
+                        </center>
+                        <div class="panel-body panel-collapse collapse" id="pv-table_'.$gene_id[0].'">
+                            <div class="pv_interaction_area"> 
+
+                            <!--here comes the pv interaction accordion div-->
+                            </div>';
+                   echo'</div>
+
                     </div>
-                    <div class="shift_line"></div>';
+                </div>
+                <div class="shift_line"></div>';
                             
               echo' <div class="panel-group" id="accordion_documents_pp_'.$gene_id[0].'">
                         <div class="panel panel-default">
-                            <div class="panel-heading" onclick="load_pp_interaction(this)"  data-mode="PP" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'">
+                            <div class="panel-heading" onclick="load_pp_interaction(this, \''.$path.'\')"  data-mode="PP" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'">
 
                                     <a class="accordion-toggle collapsed" href="#pp-table_'.$gene_id[0].'" data-parent="#accordion_documents_pp_'.$gene_id[0].'" data-toggle="collapse">
                                             <strong>Plant Plant Interaction</strong>
@@ -3355,473 +3268,7 @@ function load_and_display_interactions_with_ajax($gene_id,$uniprot_id,$transcrip
                         </div>
                     </div>
                     <div class="shift_line"></div>
-    </div>';
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-}
-function load_and_display_interactions_old($gene_id,$gene_alias,$descriptions, $gene_symbol,$proteins_id,$species,$interactionsCollection){
-    //get all interactor for each dataset (biogrid, intact, hipdb, etc..)
-            
-    $interaction_array=get_interactor($gene_id,$gene_alias,$descriptions, $gene_symbol,$proteins_id,$species,$interactionsCollection);
-    $counter=0;
-    //$timestart=microtime(true);
-    foreach ($interaction_array as $array){
-        if ($counter===0){
-            $total_protein_hpidb=count($array);
-
-        }
-        if ($counter===1){
-
-            $total_protein_intact=count($array);
-
-        }
-        else if ($counter===2){
-
-            $total_protein_litterature=0;
-            foreach ($array as $intact){
-                $total_protein_litterature++;
-            }
-        }
-        else{
-
-            $total_protein_biogrid=0;
-            $tgt="";
-            $tgt_array=array();
-
-
-            foreach ($array as $biogrid){
-                //foreach ($biogrid as $data) {
-                foreach ($biogrid as $key=>$value) {
-                    //echo "key: ". $key. " and value: " . $value."<br>";
-                    if( $key=="INTERACTOR B"){
-                        $tgt=$value;
-                    }
-
-//                                foreach ($data as $key=>$value) {
-//                                    if( $key=="tgt"){
-//                                       $tgt=$value; 
-//                                    }
-//                                }
-//                                error_log($value[0]);
-//                                if ($value[0]=="tgt"){
-//                                    $tgt=$value[1];
-//                                }                                
-                }
-                if (in_array($tgt,$tgt_array)===FALSE){
-                    //echo "interactor to add ".$tgt."<br>";
-                   array_push($tgt_array, $tgt);
-                   $total_protein_biogrid++; 
-                }
-
-
-            }
-
-        }
-        $counter++;
-    }
-
-    $counter=0;
-    $pub_list=array();
-    foreach ($interaction_array as $array){
-
-
-        if ($counter==0){
-            //error_log('in counter value: '.$counter);               
-            echo'
-            <div class="panel-group" id="accordion_documents">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-
-                        <a class="accordion-toggle collapsed" href="#hpidb2" data-parent="#accordion_documents" data-toggle="collapse">
-                            <strong> Host Pathogen Interaction (hpidb2)</strong> ('. $total_protein_hpidb.')
-                        </a>				
-
-                    </div>
-                    <div class="panel-body panel-collapse collapse" id="hpidb2">';
-
-                        echo'
-                        <div class="goProcessTerms goTerms">';
-
-                        echo'';
-
-                        $total_protein_hpidb=0;
-                        foreach ($array as $hpidb){
-                            $string_seq='<ul><span class="goTerm">';
-                            foreach ($hpidb as $values){
-                                foreach ($values as $key=>$value){
-
-
-
-                                    //error_log('key: '.$key.'and value: '.$value);
-                                    if ($key=='src'){
-
-                                        $string_seq.='<li value='.$value.'> host protein: <a href="http://www.uniprot.org/uniprot/'.$value.'">'.$value.'</a></li>';
-
-                                    }
-                                    elseif ($key=='tgt') {
-                                         $tgt=$value;
-                                        $string_seq.='<li value='.$value.'> viral protein: <a href="http://www.uniprot.org/uniprot/'.$value.'">'.$value.'</a></li>';
-
-                                    }
-                                    elseif ($key=='method') {
-                                         $string_seq.='<li value='.$value.'> method: '.$value.'</li>';
-
-                                    }            
-                                    elseif ($key=='pub') {
-                                         $string_seq.='<li value='.$value.'> publication: <a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$value.'">'.$value.'</a></li>';
-                                         $found=FALSE;
-                                         foreach ($pub_list as $pub) {
-                                             if ($value==$pub){
-                                                 $found=TRUE;
-                                             }
-                                         }
-                                         if ($found==FALSE){
-                                             array_push($pub_list, $value);
-                                         }
-
-
-
-                                    }
-                                    elseif ($key=='src_name') {
-                                        $string_seq.='<li value='.$value.'> host name: '.$value.'</li>';
-
-                                    }
-                                    elseif ($key=='tgt_name') {
-                                        $string_seq.='<li value='.$value.'> virus name: '.$value.'</li>';
-
-                                    }
-                                    elseif ($key=='host_taxon') {
-                                        $string_seq.='<li value='.$value.'> host taxon: '.$value.'</li>';
-
-                                    }
-                                    elseif ($key=='virus_taxon') {
-                                        $string_seq.='<li value='.$value.'> virus taxon: '.$value.'</li>';
-
-                                    }
-                                    else{
-
-                                    }
-                                }
-
-
-                            }
-                            $string_seq.='</ul></span>';
-                            add_accordion_panel($string_seq, $tgt, $tgt);
-                            $total_protein_hpidb++;
-
-                        }
-                        //$counter++;
-                        echo'
-                        </div>';
-
-                    echo'
-                    </div></div></div>';
-        }
-        elseif ($counter==1){
-            echo'
-            <div class="panel-group" id="accordion_documents">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-
-                        <a class="accordion-toggle collapsed" href="#intact" data-parent="#accordion_documents" data-toggle="collapse">
-                            <strong> IntAct plant/plant interaction </strong> ('. $total_protein_intact.')
-                        </a>				
-
-                    </div>
-                    <div class="panel-body panel-collapse collapse" id="intact">';
-
-                        echo'
-                        <div class="goProcessTerms goTerms">';
-
-                        echo'';
-
-                        $total_protein_intact=0;
-                        foreach ($array as $intact){
-                            $string_seq='<ul><span class="goTerm">';
-                            foreach ($intact as $attributes){
-
-                                if ($attributes[0]=='src'){
-
-                                    $string_seq.='<li value='.$attributes[1].'> Host protein A: <a href="http://www.uniprot.org/uniprot/'.$attributes[1].'">'.$attributes[1].'</a></li>';
-
-                                }
-                                elseif ($attributes[0]=='tgt') {
-                                     $tgt=$attributes[1];
-                                    $string_seq.='<li value='.$attributes[1].'> Host protein B: <a href="http://www.uniprot.org/uniprot/'.$attributes[1].'">'.$attributes[1].'</a></li>';
-
-                                }
-                                elseif ($attributes[0]=='method') {
-                                     $string_seq.='<li value='.$attributes[1].'> method: '.$attributes[1].'</li>';
-
-                                }
-
-                                elseif ($attributes[0]=='pub') {
-                                     $string_seq.='<li value='.$attributes[1].'> publication: <a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$attributes[1].'">'.$attributes[1].'</a></li>';
-                                     $found=FALSE;
-                                     foreach ($pub_list as $pub) {
-                                         if ($attributes[1]==$pub){
-                                             $found=TRUE;
-                                         }
-                                     }
-                                     if ($found==FALSE){
-                                         array_push($pub_list, $attributes[1]);
-                                     }
-
-
-
-                                }
-                                elseif ($attributes[0]=='src_name') {
-                                    $string_seq.='<li value='.$attributes[1].'> Host A: '.$attributes[1].'</li>';
-
-                                }
-                                elseif ($attributes[0]=='tgt_name') {
-                                    $string_seq.='<li value='.$attributes[1].'> Host B: '.$attributes[1].'</li>';
-
-                                }
-//                                            elseif ($attributes[0]=='host_taxon') {
-//                                                $string_seq.='<li value='.$ $attributes[1].'> host taxon: '.$attributes[1].'</li>';
-//
-//                                            }
-//                                            elseif ($attributes[0]=='virus_taxon') {
-//                                                $string_seq.='<li value='.$ $attributes[1].'> virus taxon: '.$attributes[1].'</li>';
-//
-//                                            }
-                                else{
-
-                                }
-
-
-                            }
-                            $string_seq.='</ul></span>';
-                            add_accordion_panel($string_seq, $tgt, $tgt);
-                            $total_protein_intact++;
-
-                        }
-                        //$counter++;
-                        echo'
-                        </div>';
-
-                    echo'
-                    </div></div></div>';
-        }
-        elseif ($counter==2){
-            echo'
-
-
-            <div class="panel-group" id="accordion_documents">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-
-                        <a class="accordion-toggle collapsed" href="#litterature" data-parent="#accordion_documents" data-toggle="collapse">
-                            <strong> Litterature plant/virus </strong> ('.  $total_protein_litterature.')
-                        </a>				
-
-                    </div>
-                    <div class="panel-body panel-collapse collapse" id="litterature">
-                    ';
-
-                    echo'
-                    <div class="goProcessTerms goTerms">
-
-                    ';
-                    $total_protein_litterature=0;
-                    foreach ($array as $lit){
-
-                        $string_seq='<ul><span class="goTerm">';
-                        foreach ($lit as $attributes){
-
-
-                            if ($attributes[0]=='src'){
-                                $string_seq.='<li value='.$attributes[1].'> host protein: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='tgt') {
-                                $tgt=$attributes[1];
-                                $string_seq.='<li value='.$attributes[1].'> viral protein: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='method') {
-                                $string_seq.='<li value='.$attributes[1].'> method: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='pub') {
-                                $string_seq.='<li value='.$attributes[1].'> publication: <a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$attributes[1].'">'.$attributes[1].'</a></li>';
-                                $found=FALSE;
-                                foreach ($pub_list as $pub) {
-                                    if ($attributes[1]==$pub){
-                                        $found=TRUE;
-                                    }
-                                }
-                                if ($found==FALSE){
-                                    array_push($pub_list, $attributes[1]);
-                                }
-                            }
-                            elseif ($attributes[0]=='host_name') {
-                                $string_seq.='<li value='.$attributes[1].'> host name: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='virus_name') {
-                                $string_seq.='<li value='.$attributes[1].'> viral name: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='Accession_number') {
-                                $string_seq.='<li value='.$attributes[1].'> Accession number: '.$attributes[1].'</li>';
-                            }
-                            elseif ($attributes[0]=='Putative_function') {
-                                $string_seq.='<li value='.$attributes[1].'> Putative function: '.$attributes[1].'</li>';
-                            }
-                            else{
-
-                            }
-
-
-                        }
-                        $string_seq.='</ul></span>';
-                        add_accordion_panel($string_seq, $tgt, $tgt);
-                        $total_protein_litterature++;
-
-                    }
-                    //$counter++;
-
-
-                    echo'
-                    </div>';
-
-                echo'
-                </div>
-            </div></div>';
-        }
-        else{
-            echo'
-
-
-            <div class="panel-group" id="accordion_documents">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-
-                        <a class="accordion-toggle collapsed" href="#biogrid" data-parent="#accordion_documents" data-toggle="collapse">
-                            <strong> Biogrid plant/plant interaction </strong> ('.  $total_protein_biogrid.')
-                        </a>				
-
-                    </div>
-                    <div class="panel-body panel-collapse collapse" id="biogrid">
-                    ';
-
-                    echo'
-                    <div class="goProcessTerms goTerms">
-
-                    ';
-                    $total_protein_biogrid=0;
-                    $tgt="";
-                    $tgt_array=array();
-                    foreach ($array as $biogrid){
-                //foreach ($biogrid as $data) {
-
-                    //foreach ($array as $lit){
-
-                        $string_seq='<ul><span class="goTerm">';
-
-                        //foreach ($lit as $attributes){
-
-                        foreach ($biogrid as $key=>$value) {
-                                if( $key=="INTERACTOR B"){
-                                    $tgt=$value;
-                                    $string_seq.='<li value='.$value.'> '.$key.': '.$value.'</li>';
-
-                                }
-                                elseif ($key=='publication') {
-                                    $string_seq.='<li value='.$value.'> publication: <a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$value.'">'.$value.'</a></li>';
-                                    $found=FALSE;
-                                    foreach ($pub_list as $pub) {
-                                    if ($value==$pub){
-                                        $found=TRUE;
-                                    }
-                                }
-                                    if ($found==FALSE){
-                                    array_push($pub_list, $value);
-                                }
-                                }
-                                else{
-                                    $string_seq.='<li value='.$value.'> '.$key.': '.$value.'</li>';
-
-                                }
-//                                    if ($key=='src'){
-//                                        $string_seq.='<li value='.$value.'> protein A: '.$value.'</li>';
-//                                    }
-//                                    elseif ($key=='tgt') {
-//                                        $tgt=$value;
-//
-//
-//
-//                                        //http://plants.ensembl.org/Arabidopsis_thaliana/Search/Results?species=Arabidopsis%20thaliana;idx=;q=FKF1;site=ensemblunit                                            if (){
-//                                        //http://plants.ensembl.org/Arabidopsis_thaliana/Search/Results?species=Arabidopsis%20thaliana;idx=;q=CUL1;site=ensemblunit
-//                                        $string_seq.='<li value='.$value.'> protein B: '.$value.'</li>';
-//                                    }
-//                                    elseif ($key=='method') {
-//                                        $string_seq.='<li value='.$value.'> method: '.$value.'</li>';
-//                                    }
-//                                    elseif ($key=='pub') {
-//                                        $string_seq.='<li value='.$value.'> publication: <a href="http://www.ncbi.nlm.nih.gov/pubmed/'.$value.'">'.$value.'</a></li>';
-//                                        $found=FALSE;
-//                                        foreach ($pub_list as $pub) {
-//                                            if ($value==$pub){
-//                                                $found=TRUE;
-//                                            }
-//                                        }
-//                                        if ($found==FALSE){
-//                                            array_push($pub_list, $value);
-//                                        }
-//                                    }
-//                                    elseif ($key=='host A name') {
-//                                        $string_seq.='<li value='.$value.'> host name A: '.$value.'</li>';
-//                                    }
-//                                    elseif ($key=='host B name') {
-//                                        $string_seq.='<li value='.$value.'> host name B: '.$value.'</li>';
-//                                    }
-//                                    elseif ($key=='Accession_number') {
-//                                        $string_seq.='<li value='.$value.'> Authors: '.$value.'</li>';
-//                                    }
-////                                        elseif ($attributes[0]=='Putative_function') {
-////                                            $string_seq.='<li value='.$ $attributes[1].'> Putative function :'.$attributes[1].'</li>';
-////                                        }
-//                                    else{
-//
-//                                    }
-
-
-                        }
-                        $string_seq.='</ul></span>';
-                        if (in_array($tgt,$tgt_array)===FALSE){
-                            array_push($tgt_array, $tgt);
-                            add_accordion_panel($string_seq, $tgt, $tgt);
-                            $total_protein_biogrid++;
-                        }
-
-
-                    }
-
-                    //$counter++;
-
-
-                    echo'
-                    </div>';
-
-                echo'
-                </div>
-            </div></div>';
-        }
-        $counter++;
-    }
-    
-    
-    
+    </div>'; 
 }
 function pretty_table(array $headers, array $values, $_id='null'){
 
@@ -4094,7 +3541,7 @@ function display_multi_results_table(array $cursor){
                         $score+=(float)$result['mapping_file']['Score_orthologs']; 
                         $score+=(float)$result['mapping_file']['Score_QTL']; 
                         $score+=(float)$result['mapping_file']['Score_SNP'];
-                        if ($counter===count($cursor['result'])-1){
+                        if ($counter===count($cursor['firstBatch'])-1){
                             $table_string.='<td>'.$score.'</td>';
                             $table_string.='</tr>';
                         }
@@ -4112,7 +3559,7 @@ function display_multi_results_table(array $cursor){
                             $current_id=$result['mapping_file']['Gene ID'];
 
                             $table_string.='<tr>';
-                            array_push($gene_id,$result['mapping_file']['Gene ID']);
+                            array_push($gene_id, $result['mapping_file']['Gene ID']);
                             $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $result['species']).'&search='.$result['mapping_file']['Gene ID'].'">'.$result['mapping_file']['Gene ID'].'</a></td>';
                             $table_string.='<td>'.$result['mapping_file']['Description'].'</td>';
                             if (isset($result['mapping_file']['Alias']) && $result['mapping_file']['Alias']!="NA"){
@@ -4135,7 +3582,7 @@ function display_multi_results_table(array $cursor){
                             $score+=(float)$result['mapping_file']['Score_orthologs']; 
                             $score+=(float)$result['mapping_file']['Score_QTL']; 
                             $score+=(float)$result['mapping_file']['Score_SNP']; 
-                            if ($counter===count($cursor['result'])-1){
+                            if ($counter===count($cursor['firstBatch'])-1){
                                 $table_string.='<td>'.$score.'</td>';
                                 $table_string.='</tr>';
                             }
@@ -4146,7 +3593,7 @@ function display_multi_results_table(array $cursor){
                             $score+=(float)$result['mapping_file']['Score_orthologs']; 
                             $score+=(float)$result['mapping_file']['Score_QTL']; 
                             $score+=(float)$result['mapping_file']['Score_SNP'];
-                            if ($counter===count($cursor['result'])-1){
+                            if ($counter===count($cursor['firstBatch'])-1){
                                 $table_string.='<td>'.$score.'</td>';
                                 $table_string.='</tr>';
 
@@ -4164,66 +3611,81 @@ function display_multi_results_table(array $cursor){
     
     
 }
+
+function make_network_list($path='null'){
+    echo '
+    <!--div id="NetworkSearch"-->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Network</strong>
+        </div>
+        <div class="panel-body" id="NetworkSearch">
+            <p>Display the direct interactors from your protein.</p>
+            <br />
+            <form action="'.$path.'/src/network/network-results.php" target="_blank" method="get" class="clear search-form homepage-search-form">
+                <fieldset>
+                <wbr/>
+                    <div class="form-field ff-multi">
+                        <div align="left" class="ff-inline ff-right" >
+                            <label for="search">Get network for: </label>
+                            <span class="inp-group">
+                                <input value="" name="search" class="_string input inactive query optional ftext" id="search" type="text" size="30" required/>
+                                <i class="fa fa-search"></i> <span><input value="Go" class="fbutton" type="submit" /></span>
+                            </span>
+                            <wbr/>
+                        </div>
+                        <div class="ff-notes">
+                            <p class="search-example " style="padding : 6px">e.g. 
+                                <a class="nowrap" target="_blank" href="'.$path.'/src/network/network-results.php?organism=Arabidopsis+thaliana&search=AT1G05760">AT1G05760</a> 
+                                or 
+                                <a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=ATCG01100">TODO</a>
+                                or
+                                <a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Prunus+persica&search=PRUPE_ppa009370mg">TODO</a>                   
+                            </p>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    ';
+
+}
+
+// Render Search panel
 function make_species_list($cursor,$path='null'){
-
-    
-    /*
-    $array = iterator_to_array($cursor);
-    $keys =array();
-    
-    foreach ($array as $k => $v) {
-            foreach ($v as $a => $b) {
-                $keys[] = $a;
-            }
-    }
-    $keys = array_values(array_unique($keys));
-
-    //Debut du corps de la liste
-    echo '<label for="species">Species</label>';
-
-    echo '<select class="form-control" id="speciesID" name="speciesID">';
-    echo '<option value ="">----Choose species----</option>';   
-    //Parcours de chaque ligne du curseur
-    foreach($cursor as $line) {
-        //Slice de lid Mongo
-            foreach(array_slice($keys,1) as $key => $value) {
-                  if(is_array($line[$value])){;
-                                echo '<option value="speciess">'.show_array($line[$value]).'</option>';        
-    	            }
-        	           else {
-                                echo '<option value="'.$line[$value].'">'.$line[$value].'</option>';
-        
-          	         }
-           }
-    }
-    echo '</select>';
-    */
-     //echo '<label for="species">species</label>';
-
-    //echo '<select class="form-control" id="speciesID" name="speciesID">';
     echo '
     
-    <div id="SpeciesSearch">
-    	
+    <!--div id="SpeciesSearch"-->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Search</strong>
+        </div>
+        <div class="panel-body" id="SpeciesSearch">
+        	<p>
+                COBRA database provides knowledges on the viral factor(s) that determine(s) the breaking of the resistance 
+                and evaluates the durability of the resistance conferred 
+                by the new candidate genes prior to transfer to crop species.
+            </p>
+            <br />
     	<form action="'.$path.'/src/Multi-results.php" target="_blank" method="get" class="clear search-form homepage-search-form">
             <fieldset>
             <wbr/>
                 <div class="form-field ff-multi">
                     <div align="left" class="ff-inline ff-right" >
-                        <label for="species" class="ff-label">Search:</label>
-
+                        <label for="species" class="ff-label">For:</label>
                             <span class="inp-group">
                                 <select name="organism" class="fselect input" id="organism">
-                                        <option value="All species" selected="selected">All species</option>
-                                        <option disabled="disabled" value="">---</option>';   
+                                    <option value="All species" selected="selected">All species</option>
+                                    <option disabled="disabled" value="">---</option>';   
                                 //Parcours de chaque ligne du curseur
                             foreach($cursor as $line) {
-                                    if ($line!="Prunus armeniaca" && $line!="Prunus domestica"){
-                                        echo '<option value="'.$line.'">'.$line.'</option>';
-                                    }
+                                if ($line!="Prunus armeniaca" && $line!="Prunus domestica"){
+                                    echo '<option value="'.$line.'">'.$line.'</option>';
+                                }
                             }
                             echo '</select>
-                                    <label for="search">for</label>
+                                <label for="search"> search protein </label>
                             </span>
                             <wbr/>
                             <span class="inp-group">
@@ -4231,23 +3693,26 @@ function make_species_list($cursor,$path='null'){
                                     <i class="fa fa-search"></i> <span><input value="Search" class="fbutton" type="submit" /></span>
                             </span>
                             <wbr/>
-    				</div>
-    				<div class="ff-notes">
-    					<p class="search-example " style="padding : 6px">e.g. 
-    						<a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=AT1G75950">AT1G75950</a> 
-    						or 
-    						<a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=ATCG01100">ATCG01100</a>
-    						or
-                                                <a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Prunus+persica&search=PRUPE_ppa009370mg">PRUPE_ppa009370mg</a>
+    				    </div>
+        				<div class="ff-notes">
+        					<p class="search-example " style="padding : 6px">e.g. 
+        						<a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=AT1G75950">AT1G75950</a> 
+        						or 
+        						<a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=ATCG01100">ATCG01100</a>
+        						or
+                                <a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Prunus+persica&search=PRUPE_ppa009370mg">PRUPE_ppa009370mg</a>
 
-                                                
-    					</p>
-    				</div>
-    			</div>
-    		</fieldset>
-    	</form>
+                                                    
+        					</p>
+        				</div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
     </div>';
 }
+
+
 function make_CrossCompare_list($cursor){
 
     
@@ -4399,7 +3864,7 @@ function makeDatatableFromAggregate($cursor){
     	 
 	//}
     //}
-    if (count($cursor['result'])==0){
+    if (count($cursor['cursor']['firstBatch'])==0){
     	echo'No results found';
     
     }
@@ -4407,7 +3872,7 @@ function makeDatatableFromAggregate($cursor){
     	//table-striped table-bordered
 		echo'<table id="example" class="table table-bordered" cellspacing="0" width="100%">';
 		echo'<thead><tr>';
-		foreach ( $cursor['result'] as $value )
+		foreach ( $cursor['cursor']['firstBatch'] as $value )
 		{
 		
 			//echo "level 1 value:".$value."<br/";
@@ -4451,7 +3916,7 @@ function makeDatatableFromAggregate($cursor){
 	
 		//fill the table
 		echo'<tbody>';
-		foreach ( $cursor['result'] as $value )
+		foreach ( $cursor['cursor']['firstBatch'] as $value )
 		{
 			echo "<tr>";
 			foreach ( $value as $idss => $valuess )
@@ -4533,8 +3998,8 @@ function datatableFromAggregate($cursor){
 
 	echo'<table id="example" class="table table-bordered" cellspacing="0" width="100%">';
 	echo'<thead><tr>';
-	for ($i = 0; $i < count($cursor['result']); $i++) {
-		$test=$cursor['result'][$i];
+	for ($i = 0; $i < count($cursor['cursor']['firstBatch']); $i++) {
+		$test=$cursor['cursor']['firstBatch'][$i];
 		
 		if(is_array($test)){
 			foreach ( $test as $id => $doc ){

@@ -55,6 +55,7 @@ if (isset($_POST['gene_ids'],$_POST['gene_ids_bis'],$_POST['species'],$_POST['mo
 
                                         </div>
                                     </center>
+                                    <br />
                                 <div class="container animated fadeInDown">
                                     <div class="content_test_'.str_replace(".", "__", $values['Transcript ID']).'">
 

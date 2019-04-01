@@ -141,7 +141,7 @@ if (((isset($_GET['organism'])) && ($_GET['organism']!='')) && ((isset($_GET['se
                     array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
                 ),
                 // array("allowDiskUse" => True),
-                array('cursor' => ["batchSize" => 10]));
+                array('cursor' => ["batchSize" => 20]));
                 array_push($cursor_array, $cursor);
             }
         }
@@ -170,7 +170,7 @@ if (((isset($_GET['organism'])) && ($_GET['organism']!='')) && ((isset($_GET['se
                     ),
                     array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))
                 ),
-                array('cursor' => ["batchSize" => 10]));
+                array('cursor' => ["batchSize" => 20]));
                 array_push($cursor_array, $cursor);
             }
         }

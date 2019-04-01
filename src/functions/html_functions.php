@@ -18,7 +18,7 @@ function new_cobra_header($path='null'){
     <!-- Theme style -->
     
     
-    <link rel="stylesheet" type="text/css" href="'.$path.'/js/pointer_events_polyfill.js"></script>
+    <link rel="stylesheet" type="text/javascript" href="'.$path.'/js/pointer_events_polyfill.js"></script>
 
     <link href="'.$path.'/css/AdminLTE.css" rel="stylesheet" type="text/css" />
 
@@ -60,26 +60,18 @@ function new_cobra_header($path='null'){
     <script type="text/javascript" src="'.$path.'/css/Highcharts-4.1.8/js/modules/data.js"></script>
     <script type="text/javascript" src="'.$path.'/js/app.min.js"></script> 
     <title>COBRA</title>';
-    include($path."/src/functions/piwik.php");
+    // include($path."/src/functions/piwik.php");
     echo '</head>';
 }
 function add_ajax_accordion_panel($function='null',$accordion_id='null', $body_panel_id='null',$loading_id='null',$area_id='null'){
     echo '<div class="panel-group" id="accordion_documents_'.$accordion_id.'">
             <div class="panel panel-default">
-                <div class="panel-heading" onclick="'.$function.'">
+                <div class="panel-heading" onclick="'.$function.'" id="accordion-score">
 
-                        <a class="accordion-toggle collapsed" href="#'.$body_panel_id.'" data-parent="#accordion_documents_'.$accordion_id.'" data-toggle="collapse">
-                                <strong>Top ranking susceptibility genes using COBRA scoring function</strong>
-                                
-                        </a>				
-                        <!--<select data-id="'.$area_id.'" onchange="change_species(this)">
-                            <option value="Arabidopsis thaliana">Arabidopsis thaliana</option>
-                            <option value="Prunus persica">Prunus persica</option>
-                            <option value="Solanum lycopersicum">Solanum lycopersicum</option>
-                            <option value="Cucumis melo">Cucumis melo</option>
-                            <option value="Oriza sativa ssp japonica">Oriza sativa ssp japonica</option>
-                            <option value="Hordeum vulgare">Hordeum vulgare</option>
-                        </select>-->
+                    <a class="accordion-toggle collapsed" href="#'.$body_panel_id.'" data-parent="#accordion_documents_'.$accordion_id.'" data-toggle="collapse">
+                            <strong>Top ranking susceptibility genes using COBRA scoring function</strong>
+                            
+                    </a>
                 </div>
                 <center>
                     <div class="'.$loading_id.'" style="display: none"></div>
@@ -88,18 +80,13 @@ function add_ajax_accordion_panel($function='null',$accordion_id='null', $body_p
                     <div class="'.$area_id.'"> 
 
                     <!--here comes the table div-->
-                    </div>';
-           echo'</div>
-
+                    </div>
+                </div>
             </div>
         </div>
     <div class="shift_line"></div>';
 }
 function add_accordion_panel($table_string,$panel_title='null',$unique_id='null'){
-    
-    
-
-    
     echo'<div class="panel-group" id="accordion_documents'.$unique_id.'" style="border-radius: 10px;display: table;margin: auto auto;vertical-align:middle;display:inline-block;width:100%;">
                 <div class="panel panel-default">
                     <div class="panel-heading">  
@@ -110,104 +97,18 @@ function add_accordion_panel($table_string,$panel_title='null',$unique_id='null'
                     <div class="panel-body panel-collapse collapse" id="'.$unique_id.'">
                         
                             
-                           ';
-                            echo  $table_string;
-                            echo'
+                           '.$table_string.'
                         
                     </div>
-                    
                 </div>
             </div>    
      <br/>';
-    
-    
-    
-    
-    
-/*   echo'<table id="example3" class="table table-bordered" cellspacing="0" width="100%">';
-//    echo'<thead><tr>';
-//
-//    //recupere le titre
-//    #echo "<th>type</th>";
-//    echo "<th>Mapping type</th>";
-//    echo "<th>src ID</th>";
-//    echo "<th>src type</th>";
-//    echo "<th>src_version</th>";
-//    echo "<th>tgt ID</th>";
-//    echo "<th>tgt type</th>";
-//    echo "<th>tgt_version</th>";
-//    echo "<th>species</th>";
-//
-//    echo'</tr></thead>';
-//
-//    //Debut du corps de la table
-//    echo'<tbody>';
-//    foreach($cursor['result'] as $line) {
-//
-//        //echo $line['src_to_tgt'];
-//        for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//            echo "<tr>";
-//
-//            echo '<td>'.$line['type'].'</td>';
-//
-//            echo '<td>'.$line['src_to_tgt'][0].'</td>';
-//            echo '<td>'.$line['src'].'</td>';
-//            echo '<td>'.$line['src_version'].'</td>';
-//
-//            //for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//
-//            echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-//
-//
-//            //}
-//            echo '<td>'.$line['tgt'].'</td>';
-//            echo '<td>'.$line['tgt_version'].'</td>';
-//            echo '<td>'.$line['species'].'</td>';
-//            echo "</tr>";
-//        }
-//
-//    }
-//    echo'</tbody></table></div>';
-//    
-//    echo'<div class="panel-group" id="accordion_documents">
-//                <div class="panel panel-default">
-//                    <div class="panel-heading">
-//                        <h3>
-//                            <a class="accordion-toggle collapsed" href="#collapse_documents" data-parent="#accordion_documents" data-toggle="collapse">
-//                                Documents and Presentations
-//                            </a>				
-//                        </h3>
-//                    </div>
-//                    <div class="panel-body panel-collapse collapse" id="collapse_documents">
-//                        
-//                        <table class="table table-condensed table-hover table-striped">
-//                            <thead>
-//                                <tr>
-//                                    <th style="width:250px;">Gene Ontology Biological Process</th>
-//                                    
-//                                </tr>
-//                            </thead>
-//                            
-//                            <tbody>
-//                                <tr><td><a target="_blank" href="http://amigo.geneontology.org/amigo/term/'.$go_info[3].'" title="'.$go_info[2].'">'.$go_info[2].'</a>
-//             					 		<span class="goEvidence">[<a href="http://www.geneontology.org/GO.evidence.shtml#'.$go_info[4].'" title="Go Evidence Code">'.$go_info[4].'</a>]
-//             					 		</span></td></tr>                                
-//                            </tbody>
-//                            
-//                        </table>
-//                    </div>
-//                    
-//                </div>
-//            </div>    
-//            <br/>';*/
 }
+
 function new_cobra_body($IsLogged='null', $type='null',$section_id='null',$path='null'){
     $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
     //<li';if($uri == "/src/wiki"){ echo 'class="active"'; } echo '>
     echo'
-
-    
-
     <body class="skin-black">
         <!-- header logo: style can be found in header.less -->
         <div class="wrapper row-offcanvas row-offcanvas-left">
@@ -377,38 +278,29 @@ function new_cobra_body($IsLogged='null', $type='null',$section_id='null',$path=
 
 }
 
-
-
-function new_content_header(){
-
-}
 function new_href($link='null'){
 	echo '<a href=\"'.$link.'\">'.$link.'</a>';
 }
+
 function new_cobra_footer($val=false){
 echo'
-                    </section>
-                        <section class="col-md-12" id="footer">
-                            <h1>  </h1>
-                             <p class="text-muted" style="text-align: left">
-                                <br/>
-                                Database and website created by the <a href="http://www.cbib.u-bordeaux.fr/">CBiB</a> and <a href="https://www6.bordeaux-aquitaine.inra.fr/bfp/Recherche/Equipe-de-Virologie-vegetale">INRA</a>
-                            </p>';
-                            if ($val){
-                                echo'
-                                <p class="text-muted" style="text-align: right">Original template <a href="http://almsaeedstudio.com/AdminLTE/">AdminLTE Dashboard and Control Panel Template</a> by <a href="http://almsaeedstudio.com">Almaseed Studio</a></p>';
-                            }
-                            
-                       echo ' </section>
-            </aside>
-
-        </div>
-
-    </body>
-</html>
-
-    
-    ';
+    </section>
+        <section class="col-md-12" id="footer">
+            <h1>  </h1>
+             <p class="text-muted" style="text-align: left">
+                <br/>
+                Database and website created by the <a href="http://www.cbib.u-bordeaux.fr/">CBiB</a> and <a href="https://www6.bordeaux-aquitaine.inra.fr/bfp/Recherche/Equipe-de-Virologie-vegetale">INRA</a>
+            </p>';
+        if ($val){
+            echo'
+            <p class="text-muted" style="text-align: right">Original template <a href="http://almsaeedstudio.com/AdminLTE/">AdminLTE Dashboard and Control Panel Template</a> by <a href="http://almsaeedstudio.com">Almaseed Studio</a></p>';
+        }
+        
+echo ' </section>
+    </aside>
+</div>
+</body>
+</html>';
 
 }
 

@@ -36,7 +36,7 @@ genes_to_process=list(full_mappings_col.aggregate([
                                  }
                             }
                         ]
-                        , useCursor=False))
+                        , useCursor=True))
 for gene in genes_to_process:
     #logger.info("Gene ID: %s",gene['mapping_file']['Gene ID'])
     logger.info("Plaza ID: %s",gene['mapping_file']['Plaza ID'])

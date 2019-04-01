@@ -90,107 +90,6 @@ echo'
 
 
 
-
-
-
-
-
-
-/*//foreach ($experiment_cursor2['result'] as $doc){
-//    #print $doc['specie'];
-//        foreach ($doc['_id'] as $specie){
-//            #print $specie;
-//        }
-//        foreach ($doc['names'] as $name){
-//            #print $name;
-//        }
-//               
-//}
-
-
-//$experiment_table_string="";
-
-###DISPLAY EXPERIMENT LIST
-
-//$table_string.='<h1>COBRA Datasets</h1>';
- 
-//$experiment_table_string.='<ul>';
-// //$table_string.='<a href=experiments.php>test</a>';
-//foreach($experiment_cursor as $line) {
-// 	$title=$line['name'];
-//    $species=$line['species'];
-// 	//echo str_replace(' ','\s',$title);
-//	$experiment_table_string.='<li value='.$title.'><a href=experiments.php?xp='.str_replace(' ','\s',$title).'>'.$title.'</a></li>';
-//}
-// //makeDatatableFromFind($cursor);
-//$experiment_table_string.='</ul>';
-//add_accordion_panel($experiment_table_string, "Experiments","Experiments_lists");
-//
-//echo'<br/>';*/
-
-/*##MAPPING LIST
-
-$table_string.='<h2> Mapping lists</h2> <div class="container"><ul>';
- //$table_string.='<a href=experiments.php>test</a>';
- foreach($cursor as $line) {
-	#$table_string.='<li value='.$line['type'].'><a href=mappings.php?type='.$line['type'].'>'.$line['type'].'</a></li>';
-	$table_string.='<li value='.$line['type'].'>'.$line['type'].'('.$line['species'].')</a></li>';
-
-}
- //makeDatatableFromFind($cursor);
-$table_string.='</div>';
-*/
-
-//$mapping_table_string="";
-//###MAPPING REQUEST
-//
-//$mapping_cursor=find_all_mappings($mappingsCollection);
-//
-//
-//###MAPPING TABLE
-//
-//$mapping_table_string.='<table id="mapping" class="table table-hover dataTable no-footer">';
-////$table_string.='<table id="mappingtable" class="table table-bordered table-hover" cellspacing="0" width="100%">';
-//$mapping_table_string.='<thead><tr>';
-//	
-//	//recupere le titre
-//	//$table_string.='<th>type</th>';
-//	$mapping_table_string.='<th>Source type</th>';
-//	$mapping_table_string.='<th>Version</th>';
-//	$mapping_table_string.='<th>Target Type</th>';
-//	$mapping_table_string.='<th>Version</th>';
-//	$mapping_table_string.='<th>Organism</th>';
-//
-//	
-//	//fin du header de la table
-//$mapping_table_string.='</tr></thead>';
-//	
-////Debut du corps de la table
-//$mapping_table_string.='<tbody>';
-//
-//foreach($mapping_cursor as $line) {
-//$mapping_table_string.='<tr>';
-//	//$table_string.='<td>'.$line['type'].'</td>';
-//	$mapping_table_string.='<td>'.$line['src'].'</td>';
-//	$mapping_table_string.='<td>'.$line['src_version'].'</td>';
-//	$mapping_table_string.='<td>'.$line['tgt'].'</td>';
-//	$mapping_table_string.='<td>'.$line['tgt_version'].'</td>';
-//	$mapping_table_string.='<td>'.$line['species'].'</td>';
-//$mapping_table_string.='</tr>';
-//
-//}
-//$mapping_table_string.='</tbody></table>';
-//
-//
-//add_accordion_panel($mapping_table_string, "Mappings", "mapping_table");
-//echo'<br/>';
-
-
-
-
-
-
-
 $species_table_string="";
 
 ###SPECIES REQUEST
@@ -221,8 +120,8 @@ $species_table_string.='</tr></thead>';
 //Debut du corps de la table
 $species_table_string.='<tbody>';
 
-foreach($species_cursor['result'] as $line) {
-$species_table_string.='<tr>';
+foreach($species_cursor['cursor']['firstBatch'] as $line) {
+	$species_table_string.='<tr>';
 	$species_table_string.='<td>'.$line['full_name'].'</td>';
 	$species_table_string.='<td>'.$line['species'].'</td>';
 	if (is_array($line['aliases'])){
@@ -248,7 +147,7 @@ $species_table_string.='<tr>';
 	//$table_string.='<td>'.$line['tgt'].'</td>';
 	//$table_string.='<td>'.$line['tgt_version'].'</td>';
 	//$table_string.='<td>'.$line['species'].'</td>';
-$species_table_string.='</tr>';
+	$species_table_string.='</tr>';
 
 }
 $species_table_string.='</tbody></table>';
@@ -273,9 +172,6 @@ $virus_table_string.='<thead><tr>';
 	$virus_table_string.='<th>Aliases</th>';
 	$virus_table_string.='<th>top level</th>';
     $virus_table_string.='<th>Genus</th>';
-	//$table_string.='<th>tgt</th>';
-	//$table_string.='<th>tgt_version</th>';
-	//$table_string.='<th>species</th>';
 
 	
 	//fin du header de la table
@@ -284,83 +180,38 @@ $virus_table_string.='</tr></thead>';
 //Debut du corps de la table
 $virus_table_string.='<tbody>';
 
-foreach($virus_cursor['result'] as $line) {
-$virus_table_string.='<tr>';
-	$virus_table_string.='<td>'.$line['full_name'].'</td>';
-	$virus_table_string.='<td>'.$line['species'].'</td>';
-	if (is_array($line['aliases'])){
-		$virus_table_string.='<td>';
-		for ($i=0;$i<count($line['aliases']);$i++){
-		//foreach ($line['aliases'] as $alias){
-			if ($i==count($line['aliases'])-1){
-				$virus_table_string.=$line['aliases'][$i];
+foreach($virus_cursor['cursor']['firstBatch'] as $line) {
+	$virus_table_string.='<tr>';
+		$virus_table_string.='<td>'.$line['full_name'].'</td>';
+		$virus_table_string.='<td>'.$line['species'].'</td>';
+		if (is_array($line['aliases'])){
+			$virus_table_string.='<td>';
+			for ($i=0;$i<count($line['aliases']);$i++){
+				if ($i==count($line['aliases'])-1){
+					$virus_table_string.=$line['aliases'][$i];
+				}else{
+					$virus_table_string.=$line['aliases'][$i].', ';
+				}
 			}
-			else{
-				$virus_table_string.=$line['aliases'][$i].', ';
-			}
+			$virus_table_string.='</td>';
 			
-			//echo $alias.' ';
 		}
-		$virus_table_string.='</td>';
-		
-	}
-	else{
-		$virus_table_string.='<td>'.$line['aliases'].'</td>';
-		}
-	$virus_table_string.='<td>'.$line['top'].'</td>';
-    $virus_table_string.='<td>'.$line['genus'].'</td>';
-	//$table_string.='<td>'.$line['tgt'].'</td>';
-	//$table_string.='<td>'.$line['tgt_version'].'</td>';
-	//$table_string.='<td>'.$line['species'].'</td>';
-$virus_table_string.='</tr>';
+		else{
+			$virus_table_string.='<td>'.$line['aliases'].'</td>';
+			}
+		$virus_table_string.='<td>'.$line['top'].'</td>';
+	    $virus_table_string.='<td>'.$line['genus'].'</td>';
+	$virus_table_string.='</tr>';
 
 }
 $virus_table_string.='</tbody></table>';
 add_accordion_panel($virus_table_string, "Viruses", "virus_table");
 echo'<br/>';
 
-
-
-add_ajax_accordion_panel("load_top_scored_genes()","Top-Ranking-Sgenes", "table_Top-Ranking-Sgenes","TopScoredloading","top_score_area");
-
-
-//echo '<div class="panel-group" id="accordion_documents_Top-Ranking-Sgenes">
-//            <div class="panel panel-default">
-//                <div class="panel-heading" onclick="load_top_scored_genes()">
-//
-//                        <a class="accordion-toggle collapsed" href="#table_Top-Ranking-Sgenes" data-parent="#accordion_documents_Top-Ranking-Sgenes" data-toggle="collapse">
-//                                <strong>Top Ranking susceptibility genes using COBRA scoring function</strong>
-//                        </a>				
-//
-//                </div>
-//                <center>
-//                    <div class="TopScoredloading" style="display: none"></div>
-//                </center>
-//                <div class="panel-body panel-collapse collapse" id="table_Top-Ranking-Sgenes">
-//                    <div class="top_score_area"> 
-//
-//                    <!--here comes the top scored genes table div-->
-//                    </div>';
-//           echo'</div>
-//
-//            </div>
-//        </div>
-//    <div class="shift_line"></div>';
-
-//add_accordion_panel($CG_form_string, "Top Ranking susceptibility genes using COBRA scoring function","Top-Ranking-Sgenes"); 
+add_ajax_accordion_panel("load_top_scored_genes();","Top-Ranking-Sgenes", "table_Top-Ranking-Sgenes","TopScoredloading","top_score_area");
 
 echo'<br/>';
-
-
 echo'</div>';
-
-
-
-
-
-#'type'=>1,'src'=>1,'tgt'=>1,'src_version'=>1,'tgt_version'=>1)
-#new_cobra_species_container();
-
 
 new_cobra_footer();
 

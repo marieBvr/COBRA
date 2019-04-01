@@ -49,13 +49,13 @@ if (isset($_POST['gene_ids'],$_POST['transcript_ids'],$_POST['protein_ids'],$_PO
         )),
         array('gene'=> array('$ne'=>""))))),
         array('$project' => array("gene"=>1,'xp'=>1,'species'=>1,'day_after_inoculation'=>1,'species'=>1,'variety'=>1,'logFC'=>1,'dpi'=>1,'infection_agent'=>1,'first_condition'=>1,'second_condition'=>1,'_id'=>0))
-    ));
+    ), array('cursor' => ["batchSize" => 20]));
 
     $counter=1;
 
-    if (count($cursor2['result'])!==0){
+    if (count($cursor2['cursor']['firstBatch'])!==0){
         
-        foreach ($cursor2['result'] as $result) {
+        foreach ($cursor2['cursor']['firstBatch'] as $result) {
             
             $logfc_array=array();
             $xp_full_name=explode(".", $result['xp']);

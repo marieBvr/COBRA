@@ -142,99 +142,38 @@ function show_heatmap(element,clicked_id,FCmin, FCmax,species){
     day = new Array(series_array);
     //alert(clicked_id);
     $('.heatmap_'+clicked_id).highcharts({
-        
-//        exporting: {
-//            buttons: {
-//                customButton: {
-//                    text: 'Custom Button',
-//                    align: 'right',
-//
-//                    onclick: function () {
-//                        alert('You pressed the button!');
-//                    }
-//                },
-//               anotherButton: {
-//                    text: 'Another Button',
-//                    text: 'Custom Button',
-//                    align: 'right',
-//
-//                    onclick: function () {
-//                        alert('You pressed another button!');
-//                    }
-//                }
-//            }
-//        },
         chart: {
             type: 'heatmap',
             marginTop: 40,
             marginBottom: 130,
-            
-            
             plotBorderWidth: 1,
             events: {
-                    load: function () {
-                        //var label = this.renderer.label("set of differentially expressed genes (logFC \> "+max+" and \&lt; "+min+" n= "+total_diff_gene+") is compared to terms of all micro array genes(n= "+total_gene+", green bars). The y-axis displays the fraction relative to all GO Molecular Function terms. These terms do not show a significant enrichment (p>0.5).")
-
-                        var label = this.renderer.label("set of differentially expressed genes (n= "+total_diff_gene+") with logFC \> "+FCmax+" and \&lt; "+FCmin)
-                        .css({
-                            width: '850px',
-                            color: '#222',
-                            fontSize: '16px'
-                        })
-                        .attr({
-                            'stroke': 'silver',
-                            'stroke-width': 2,
-                            'r': 5,
-                            'padding': 10
-                        })
-                        .add();
-                
-                        label.align(Highcharts.extend(label.getBBox(), {
-                            align: 'center',
-                            x: 0, // offset
-                            verticalAlign: 'bottom',
-                            y: 5 // offset
-                        }), null, 'spacingBox');
-                
-                    }//,
-//                    selection: function(event) {
-////                        if (event.xAxis) {
-////                            //event.point.series.xAxis.categories[event.point.x]
-////                            //alert(this.series.categories);
-//                                //console.log(event.xAxis[0]);
-//                                var extremesObject = event.xAxis[0];
-//                                min = extremesObject.min;
-//                                max = extremesObject.max;
-//                                chaine="";
-//                                
-//                                xAxis = this.xAxis[0];
-//                                //console.log(xAxis.categories);
-//                                // reverse engineer the last part of the data
-//                                
-//                                //this.series.xAxis.categories[this.point.x]
-//                                $.each(this.series[0].data, function () {
-//                                    if (this.x > min && this.x < max) {
-//                                        
-//                                        
-//                                        detailData.push([this.x, this.y,xAxis.categories[parseInt(this.x)]]);
-//                                        chaine = chaine+xAxis.categories[parseInt(this.x)]+"+";
-//                                    }
-//                                });
-//                                //console.log(detailData);
-//                                test=chaine.slice(0, chaine.length-1);
-//                                console.log(test);
-//                                
-////                            //alert('min: '+ event.xAxis +', max: '+ event.xAxis[0].max);
-////                            //alert('min: '+ event.point.series.xAxis.categories[event.point.x] +', max: '+ event.xAxis[0].max);
-////                        } else {
-////                            $alert('Selection reset');
-////                        }
-//                    }
+                load: function () {
+                    var label = this.renderer.label("set of differentially expressed genes (n= "+total_diff_gene+") with logFC \> "+FCmax+" and \&lt; "+FCmin)
+                    .css({
+                        width: '850px',
+                        color: '#222',
+                        fontSize: '16px'
+                    })
+                    .attr({
+                        'stroke': 'silver',
+                        'stroke-width': 2,
+                        'r': 5,
+                        'padding': 10
+                    })
+                    .add();
+            
+                    label.align(Highcharts.extend(label.getBBox(), {
+                        align: 'center',
+                        x: 0, // offset
+                        verticalAlign: 'bottom',
+                        y: 5 // offset
+                    }), null, 'spacingBox');
+            
+                }
             },
             zoomType: 'x'
         },
-
-
         title: {
             text: 'Differentially expressed genes'
         },
@@ -244,15 +183,11 @@ function show_heatmap(element,clicked_id,FCmin, FCmax,species){
             labels: {
                 enabled: false
             }
-
         },
-        
-
         yAxis: {
             categories: [dpi+' dpi'],
             title: null
         },
-
         colorAxis: {
             stops: [
                 [0, '#3060cf'],
@@ -277,23 +212,7 @@ function show_heatmap(element,clicked_id,FCmin, FCmax,species){
                         window.open("../Multi-results.php?organism=All+species&search=" +event.point.series.xAxis.categories[event.point.x]);
 
                    }
-//                   ,                    ,
-//                    select: function () {
-//                            console.log(this.category + ': ' + this.y + ' was last selected');
-//                    }
-                    
-                    
-                    
                 }
-//                ,
-//                allowPointSelect: true,
-//                point: {
-//                    events: {
-//                        select: function () {
-//                            console.log(this.category + ': ' + this.y + ' was last selected');
-//                        }
-//                    }
-//                }
             }
         },
         legend: {
@@ -304,40 +223,28 @@ function show_heatmap(element,clicked_id,FCmin, FCmax,species){
             y: 25,
             symbolHeight: 280
         },
-
         tooltip: {
             formatter: function () {
                 return '<b>' + this.series.xAxis.categories[this.point.x] + '</b><br>Log fold change: <b>' +
                     this.point.value + '</b><br>Day post inoculation: <b>' + this.series.yAxis.categories[this.point.y] + '</b>';
             }
         },
-
         series: [{
             name: 'Differentially expressed genes (logFC > 2 or logFC < -2)',
             borderWidth: 1,
-            data: JSON.parse(day)
-            
+            data: JSON.parse(day)    
         }], 
         exporting: {
             buttons: {
                 customButton: {
                     text: 'Search on selected genes',
                     onclick: function () {
-                        //xAxis = this.xAxis[0];
-                        //alert(xAxis.categories) 
-                        //var test=xAxis.categories
-                        //res = test.replace(",", "+"); 
-                        
-                        //alert(res)
                         var extremesObject = this.xAxis[0];
                         min = extremesObject.min;
                         max = extremesObject.max;
 
                         xAxis = this.xAxis[0];
-                        //console.log(xAxis.categories);
                         // reverse engineer the last part of the data
-
-                        //this.series.xAxis.categories[this.point.x]
                         $.each(this.series[0].data, function () {
                             if (this.x > min && this.x < max) {
                                 
@@ -353,48 +260,16 @@ function show_heatmap(element,clicked_id,FCmin, FCmax,species){
                         test=chaine.slice(0, chaine.length-1);
                         //console.log(test);
                         console.log("../Multi-results.php?organism=All+species&search="+test);
-                        //window.open("../Multi-results.php?organism=All+species&search="+test);
                         window.open("../Multi-results.php?organism="+species+"&search="+test);
-                      
-                        
-                        
-                        
-                        
-                        
-                        //document.location.href="../Multi-results.php?organism=All+species&search=AT1G75950+ATCG01100
-                        
-                        
-                        //alert('You pressed the button!');
                     }
                 }
             }
         }
     });
-//    $('#add').click(function() {
-//        var chart = $('.heatmap_'+clicked_id).highcharts();
-//        normalState = new Object();
-//        normalState.stroke_width = null;
-//        normalState.stroke = null;
-//        normalState.fill = null;
-//        normalState.padding = null;
-//        normalState.r = null;
-//
-//        hoverState = new Object();
-//        hoverState = normalState;
-//        hoverState.fill = 'red';
-//        
-//        pressedState = new Object();
-//        pressedState = normalState;
-//        
-//        var custombutton = chart.renderer.button('button', 74, 10, function(){
-//            alert('New Button Pressed');
-//        },null,hoverState,pressedState).add();
-//    });
 
 }
 //AJAX function for GO enrichment 
 function load_heatmap(element){
-    //alert(element.getAttribute('data-id')) ;
     //clicked_transcript_id = element.getAttribute('data-id');
     clicked_id = element.getAttribute('data-id');
     logFCmin = element.getAttribute('data-min');
@@ -653,31 +528,20 @@ function load_top_scored_genes(){
         $.ajax({
 
             url : '../functions/top_scored_genes_page.php', // La ressource ciblée
-
             type : 'POST' ,// Le type de la requête HTTP.
-
-            //data : 'search=' + genes + '&sequence=' + clicked_sequence,
-            //data : 'test=' + gene_ids + '&gene_ids_bis=' + genebis_ids +'&species=' + species+ '&mode=unspliced',
-
-
             method: 'post',
             cache: false,
             async: true,
             dataType: "html",
             beforeSend: function() { 
-                    //  alert("start");
-                    $(".top_score_area").hide();
-                    $('.TopScoredloading').html("<img src='../../images/ajax-loader.gif' />");
-
-                    $(".TopScoredloading").show();
-                },
-
+                //  alert("start");
+                $(".top_score_area").hide();
+                $('.TopScoredloading').html("<img src='../../images/ajax-loader.gif' />");
+                $(".TopScoredloading").show();
+            },
             success: function (data) {
-
                 var jqObj = jQuery(data);
-
                 var par;
-
                 if(jqObj.find("#S-genes").length){
                    par=jqObj.find("#S-genes");
                    $(".top_score_area").empty().append(par);
@@ -686,25 +550,18 @@ function load_top_scored_genes(){
                 else{
                    par=jqObj.find(".no_results");
                    $(".top_score_area").empty().append(par);
-                
-                   
                 }
-                
-                
-
             },
             complete:function(){  
                 //   alert("stop");
                 $(".TopScoredloading").fadeOut("slow");
                 $(".top_score_area").show("slow");
             }
-
-
-
         });
         top_scored_gene_open="true";
-        }
+    }
 }  
+
 //AJAX function for plant/plant interaction 
 function load_unspliced(element){
     species=element.getAttribute('data-species');
@@ -905,7 +762,7 @@ function load_orthologs(element){
         }
 }  
 //AJAX function for plant/virus interaction 
-function load_pv_interaction(element){
+function load_pv_interaction(element, path){
     species=element.getAttribute('data-species');
     gene_id=element.getAttribute('data-id');
     gene_ids=element.getAttribute('data-gene');
@@ -914,36 +771,28 @@ function load_pv_interaction(element){
     mode=element.getAttribute('data-mode');
     
     if (pv_already_open==="true"){
-       //alert("already open");
-       //open="false";
-   }
+       //pass
+    }
     else{
         $.ajax({
 
-            url : './functions/interactions_main_page.php', // La ressource ciblée
-
+            url : path + 'functions/interactions_main_page.php', // La ressource ciblée
             type : 'POST' ,// Le type de la requête HTTP.
-
-            //data : 'search=' + genes + '&sequence=' + clicked_sequence,
             data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +'&species=' + species+'&mode=' + mode,
-
-
             method: 'post',
             cache: false,
             async: true,
             dataType: "html",
             beforeSend: function() { 
-                    //  alert("start");
-                    $(".pv_interaction_area").hide();
-                    $('.PVloading_'+gene_id).html("<img src='../images/ajax-loader.gif' />");
-
-                    $(".PVloading_"+gene_id).show();
-                },
+                //  alert("start");
+                $(".pv_interaction_area").hide();
+                $('.PVloading_'+gene_id).html("<img src='" + path + "../images/ajax-loader.gif' />");
+                $(".PVloading_"+gene_id).show();
+            },
 
             success: function (data) {
 
                 var jqObj = jQuery(data);
-
                 var par;
 
                 if(jqObj.find(".PV").length){
@@ -959,24 +808,18 @@ function load_pv_interaction(element){
                    $(".pv_interaction_area").empty().append(par);
                    
                 }
-                
-                
-
             },
             complete:function(){  
                 //   alert("stop");
                 $(".PVloading_"+gene_id).fadeOut("slow");
                 $(".pv_interaction_area").show("slow");
             }
-
-
-
         });
         pv_already_open="true";
-        }
+    }
 }  
 //AJAX function for plant/plant interaction 
-function load_pp_interaction(element){
+function load_pp_interaction(element, path){
     species=element.getAttribute('data-species');
     gene_id=element.getAttribute('data-id');
     
@@ -994,14 +837,10 @@ function load_pp_interaction(element){
     else{
         $.ajax({
 
-            url : './functions/interactions_main_page.php', // La ressource ciblée
-
+            url : path + 'functions/interactions_main_page.php', // La ressource ciblée
             type : 'POST' ,// Le type de la requête HTTP.
-
             //data : 'search=' + genes + '&sequence=' + clicked_sequence,
             data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +'&species=' + species+'&mode=' + mode,
-
-
             method: 'post',
             cache: false,
             async: true,
@@ -1009,7 +848,7 @@ function load_pp_interaction(element){
             beforeSend: function() { 
                     //  alert("start");
                     $(".pp_interaction_area").hide();
-                    $('.PPloading_'+gene_id).html("<img src='../images/ajax-loader.gif' />");
+                    $('.PPloading_'+gene_id).html("<img src='" + path + "../images/ajax-loader.gif' />");
 
                     $(".PPloading_"+gene_id).show();
                 },
@@ -1017,7 +856,6 @@ function load_pp_interaction(element){
             success: function (data) {
 
                 var jqObj = jQuery(data);
-
                 var par;
 
                 if(jqObj.find(".PP").length){
@@ -1031,18 +869,12 @@ function load_pp_interaction(element){
                    $(".pp_interaction_area").empty().append(par);
                    
                 }
-                
-                
-
             },
             complete:function(){  
                 //   alert("stop");
                 $(".PPloading_"+gene_id).fadeOut("slow");
                 $(".pp_interaction_area").show("slow");
             }
-
-
-
         });
         pp_already_open="true";
         }
@@ -1068,23 +900,19 @@ function load_genetic_markers(element){
         $.ajax({
 
             url : './functions/genetic_markers_main_page.php', // La ressource ciblée
-
             type : 'POST' ,// Le type de la requête HTTP.
-
             //data : 'search=' + genes + '&sequence=' + clicked_sequence,
             data : 'gene_ids=' + gene_ids +'&start=' + start +'&end=' + end +'&scaffold=' + scaffold +'&species=' + species+'&mode=' + mode,
-
-
             method: 'post',
             cache: false,
             async: true,
             dataType: "html",
             beforeSend: function() { 
-                    //  alert("start");
-                    $(".genetic_markers").hide();
-                    $('.GMloading_'+gene_id).html("<img src='../images/ajax-loader.gif' />");
+                //  alert("start");
+                $(".genetic_markers").hide();
+                $('.GMloading_'+gene_id).html("<img src='../images/ajax-loader.gif' />");
 
-                    $(".GMloading_"+gene_id).show();
+                $(".GMloading_"+gene_id).show();
                 },
 
             success: function (data) {
@@ -1141,13 +969,9 @@ function load_QTLs(element){
         $.ajax({
 
             url : './functions/genetic_markers_main_page.php', // La ressource ciblée
-
             type : 'POST' ,// Le type de la requête HTTP.
-
             //data : 'search=' + genes + '&sequence=' + clicked_sequence,
             data : 'gene_ids=' + gene_ids +'&start=' + start +'&end=' + end +'&scaffold=' + scaffold +'&species=' + species+'&mode=' + mode,
-
-
             method: 'post',
             cache: false,
             async: true,
@@ -1226,10 +1050,6 @@ function show_profiles(element){
             labels: {
                 enabled: false
             }
-
-            //categories: ['Apples', 'Oranges', 'Oranges', 'Oranges', 'Oranges', 'Pears', 'Grapes', 'Bananas']
-
-            //title: {text: 'Samples'}
         },
         yAxis: {
 
@@ -1352,31 +1172,25 @@ function runBlast(element){
     clicked_transcript_id = element.getAttribute('data-id');
     species = element.getAttribute('data-species');
 
-
     $.ajax({
 
         url : './tools/blast/blast.php',
         type : 'POST' ,
         data : 'search=' + clicked_transcript_id + '&species=' + species,
-
-
         method: 'post',
         cache: false,
         async: true,
         dataType: "html",
-        
         
         beforeSend: function() { 
             
             $(".content_test_"+clicked_transcript_id).hide();
             $('.loading_'+clicked_transcript_id).html("<img src='../images/ajax-loader.gif' />");
             $(".loading_"+clicked_transcript_id).show();
-	},
-        
+	    },
         success: function (data) {
             
             var jqObj = jQuery(data);
-
             var par;
 
             if(jqObj.find("#blast_results").length){
@@ -1387,23 +1201,17 @@ function runBlast(element){
             else{
                par=jqObj.find(".no_results");
                $(".content_test_"+clicked_transcript_id ).empty().append(par);
-
-
             }
-//            
-//            
-//            
-//
-//            var jqObj = jQuery(data);
-//            var par=jqObj.find("#blast_results");
-//            $(".content_test_"+clicked_transcript_id ).empty().append(par);
 
+        },
+        error: function (request, status, error) {
+            console.log(request.responseText);
         },
         complete:function(){  
 
             $(".loading_"+clicked_transcript_id).fadeOut("slow");
             $(".content_test_"+clicked_transcript_id).show("slow");
-	}
+	    }
     });
 
 }
@@ -1496,35 +1304,33 @@ $(function () {
 });
 
 function load_table2(element) {
-element.DataTable({
-    "scrollX": true,
-    "jQueryUI": true,
-    dom: 'Bfrtip',
-    buttons: [
-        'csv', 'excel', 'pdf'
-    ],
-        "oLanguage": { 
-            "sProcessing":   "Processing...",
-            "sLengthMenu":   "display _MENU_ items",
-            "sZeroRecords":  "No item found",
-            "sInfo": "Showing item _START_ to _END_ of  _TOTAL_ items",
-            "sInfoEmpty": "Displaying item 0 to 0 on 0 items",
-            "sInfoFiltered": "(filtered from _MAX_ items in total)",
-            "sInfoPostFix":  "",
-            "sSearch":       "Search: ",
-            "sUrl":          "",
-            "oPaginate": {
-                "sFirst":    "First",
-                "sPrevious": "Previous",
-                "sNext":     "Next",
-                "sLast":     "Last"
+    element.DataTable({
+        "scrollX": true,
+        "jQueryUI": true,
+        dom: 'Bfrtip',
+        buttons: ['csv', 'excel', 'pdf'],
+            "oLanguage": { 
+                "sProcessing":   "Processing...",
+                "sLengthMenu":   "display _MENU_ items",
+                "sZeroRecords":  "No item found",
+                "sInfo": "Showing item _START_ to _END_ of  _TOTAL_ items",
+                "sInfoEmpty": "Displaying item 0 to 0 on 0 items",
+                "sInfoFiltered": "(filtered from _MAX_ items in total)",
+                "sInfoPostFix":  "",
+                "sSearch":       "Search: ",
+                "sUrl":          "",
+                "oPaginate": {
+                    "sFirst":    "First",
+                    "sPrevious": "Previous",
+                    "sNext":     "Next",
+                    "sLast":     "Last"
+                }
+            },
+            "language": {
+                "decimal": ",",
+                "thousands": "."
             }
-        },
-        "language": {
-                        "decimal": ",",
-                        "thousands": "."
-            }
-});
+    });
 };
 //Datatable 
 function load_table(element) {
@@ -1533,7 +1339,6 @@ function load_table(element) {
         "scrollX": true,
         "jQueryUI": true,
         "pagingType": "full_numbers",
-
         "oLanguage": { 
             "sProcessing":   "Processing...",
             "sLengthMenu":   "display _MENU_ items",
@@ -1853,5 +1658,8 @@ $(document).ready(function() {
 	});
 });
 
+function load_network(gene_id, result){
+    console.log(gene_id, result);
+}
 
 

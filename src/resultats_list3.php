@@ -98,14 +98,15 @@ for ($c=0;$c<count($id_details);$c++){
         array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
         array('$unwind'=>'$mapping_file'),
         array('$match' => array('$or'=> array(array('mapping_file.Plaza ID'=>$search),array('mapping_file.Uniprot ID'=>$search),array('mapping_file.Protein ID'=>$search),array('mapping_file.Protein ID 2'=>$search),array('mapping_file.Alias'=>$search),array('mapping_file.Probe ID'=>$search),array('mapping_file.Gene ID'=>$search),array('mapping_file.Gene ID 2'=>$search),array('mapping_file.Symbol'=>$search)))),
-        array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))));
+        array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))), 
+    array('cursor' => ["batchSize" => 10]));
 
     //var_dump($cursor);
 
-    if(count($cursor['result'])>1){
+    if(count($cursor['cursor']['firstBatch'])>1){
 
         //echo 'HIGHER THAN ONE :'.count($cursor['result']);
-        foreach ($cursor['result'] as $result) {
+        foreach ($cursor['cursor']['firstBatch'] as $result) {
             //echo $result['mapping_file']['Probe ID'];
             //echo $result['mapping_file']['Gene ontology ID'];
             $species=$result['species'];
@@ -221,8 +222,8 @@ for ($c=0;$c<count($id_details);$c++){
 
 
     }
-    else if (count($cursor['result'])==1){
-        foreach ($cursor['result'] as $result) {
+    else if (count($cursor['cursor']['firstBatch'])==1){
+        foreach ($cursor['cursor']['firstBatch'] as $result) {
         //echo $result['mapping_file']['Gene ID 2'];
         //echo $result['mapping_file']['Gene ontology ID'];
             $species=$result['species'];

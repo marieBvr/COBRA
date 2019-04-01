@@ -55,6 +55,9 @@
                             <li >
                                 <a href="../start-services/">Starting services</a>
                             </li>
+                            <li >
+                                <a href="../database/">Database</a>
+                            </li>
                         </ul>
 
                     <ul class="nav navbar-nav navbar-right">
@@ -100,27 +103,27 @@
 <ul>
 <li>Make sure your OS is up-to-date before running these command line.</li>
 </ul>
-<pre><code>sudo yum update
+<pre><code class="bash">sudo yum update
 sudo yum install yum-utils
 sudo yum install xlrd prettytable gcc openssl-devel
 </code></pre>
 
 <h2 id="install-git">Install git</h2>
-<pre><code>sudo yum install git
+<pre><code class="bash">sudo yum install git
 </code></pre>
 
 <h2 id="install-php">Install php</h2>
-<pre><code>sudo yum install php-gd php-mysql php-mbstring php-fpm php php-pear php-devel
+<pre><code class="bash">sudo yum install php-gd php-mysql php-mbstring php-fpm php php-pear php-devel
 </code></pre>
 
 <h2 id="install-mongodb">Install mongodb</h2>
 <p>You can follow official instructions <a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/#configure-the-package-management-system-yum">MongoDB for CentOS</a> or use pecl :</p>
-<pre><code>sudo pecl install mongo
+<pre><code class="bash">sudo pecl install mongo
 sudo vi /etc/php.ini # uncomment line extension=mongo.so
 </code></pre>
 
 <h2 id="install-nginx">Install nginx</h2>
-<pre><code>sudo yum install nginx
+<pre><code class="bash">sudo yum install nginx
 sudo vi /etc/nginx/nginx.conf
 </code></pre>
 
@@ -150,7 +153,7 @@ sudo vi /etc/nginx/nginx.conf
 </code></pre>
 
 <p>Then, if not existing, create default.conf file :</p>
-<pre><code>sudo touch /etc/nging/conf.d/default.conf
+<pre><code class="bash">sudo touch /etc/nging/conf.d/default.conf
 sudo vi /etc/nging/conf.d/default.conf
 </code></pre>
 
@@ -184,20 +187,20 @@ sudo vi /etc/nging/conf.d/default.conf
 
 <p>See <a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-centos-7#step-one-%E2%80%94-install-nginx">here</a> for more information.</p>
 <h2 id="install-mysql">Install mysql</h2>
-<pre><code>sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+<pre><code class="bash">sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
 sudo yum install mysql-community-server
 </code></pre>
 
 <h2 id="install-r">Install R</h2>
-<pre><code>sudo yum install R
+<pre><code class="bash">sudo yum install R
 </code></pre>
 
 <h2 id="add-epel-repository">Add epel repository</h2>
-<pre><code>sudo yum install epel-release
+<pre><code class="bash">sudo yum install epel-release
 </code></pre>
 
 <h2 id="install-pip-and-pymongo">Install pip and pymongo</h2>
-<pre><code>sudo yum -y install python-pip
+<pre><code class="bash">sudo yum -y install python-pip
 sudo python -m pip install --upgrade pymongo
 </code></pre></div>
         </div>

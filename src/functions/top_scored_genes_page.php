@@ -12,7 +12,6 @@ new_cobra_body(is_logged($_SESSION['login']),"Tools","section_int","../..");
 $db=mongoConnector();       
 $full_mappingsCollection = new Mongocollection($db, "full_mappings");
 
-
 $best_scored_genes=find_top_ranking_S_genes($full_mappingsCollection);
 
 $CG_form_string="";
@@ -37,7 +36,7 @@ $CG_form_string.='</tr></thead>';
 //Debut du corps de la table
 $CG_form_string.='<tbody>';
 
-foreach ($best_scored_genes['result'] as $value) {
+foreach ($best_scored_genes['cursor']['firstBatch'] as $value) {
     //var_dump($value['_id']['score']);
 
 

@@ -402,7 +402,7 @@ function convert_with_intermediary_id_into_plaza_id_list(Mongocollection $ma,$ge
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.'.$plaza_tgt_id=>$value['tgt'])), 
             array('$project' => array('mapping_file.Plaza gene id'=>1,'_id'=>0))
-            ));
+            ), array('cursor' => ["batchSize" => 20]));
         $cpt=0;
         foreach ($plaza_id['result'] as $result) {
             
@@ -429,7 +429,7 @@ function convert_without_intermediary_id_into_plaza_id_list(Mongocollection $ma,
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.'.$plaza_tgt_id=>$value['search'])), 
             array('$project' => array('mapping_file.Plaza gene id'=>1,'_id'=>0))
-            ));
+            ), array('cursor' => ["batchSize" => 20]));
         $cpt=0;
         foreach ($plaza_id['result'] as $result) {
             
@@ -528,7 +528,7 @@ function get_global_score($full_mappingsCollection,$search='null',$species='null
              )
          )
 
-    ));
+    ), array('cursor' => ["batchSize" => 20]));
    
     ///////////////////////////////
     //SUM ALL SCORE FOR THIS GENE//
@@ -555,7 +555,7 @@ function get_hpidb_plant_virus_interactor(array $protein_id, MongoCollection $pv
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$protein_id))),
             array('$project' => array('mapping_file.database_identifier'=>1,'mapping_file.protein_alias_2'=>1,'mapping_file.Virus Uniprot ID'=>1,'mapping_file.pmid'=>1,'mapping_file.author_name'=>1,'mapping_file.detection_method'=>1,'mapping_file.virus'=>1,'_id'=>0))
-        ));  
+        ), array('cursor' => ["batchSize" => 20]));  
     return $cursor;    
  
 }
@@ -567,7 +567,7 @@ function get_litterature_plant_virus_interactor(array $gene_id, MongoCollection 
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Gene ID'=>array('$in'=>$gene_id))),
             array('$project' => array('mapping_file.Virus_symbol'=>1,'mapping_file.virus'=>1,'mapping_file.method'=>1,'mapping_file.Reference'=>1,'mapping_file.species'=>1,'_id'=>0))
-        ));
+        ), array('cursor' => ["batchSize" => 20]));
 
 
     return $cursor;    
@@ -581,7 +581,7 @@ function get_intact_plant_plant_interactor(array $protein_id, MongoCollection $p
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$protein_id))),
             array('$project' => array('mapping_file.protein_EBI_ref_2'=>1,'mapping_file.Uniprot ID 2'=>1,'mapping_file.alternative_identifiers_2'=>1,'mapping_file.detection_method'=>1,'mapping_file.author_name'=>1,'mapping_file.pmid'=>1,'mapping_file.Taxid interactor A'=>1,'mapping_file.Taxid interactor B'=>1,'mapping_file.interaction_type'=>1,'mapping_file.source_database_id'=>1,'mapping_file.interaction_identifier'=>1,'_id'=>0))
-        ));  
+        ), array('cursor' => ["batchSize" => 20]));  
     return $cursor;    
  
 }
@@ -593,7 +593,7 @@ function get_biogrid_plant_plant_interactor(array $gene_id, MongoCollection $ppi
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Gene ID'=>array('$in'=>$gene_id))),
             array('$project' => array('species'=>1,'mapping_file.Gene ID 2'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'mapping_file.ALIASES_FOR_B'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'_id'=>0))
-        ));
+        ), array('cursor' => ["batchSize" => 20]));
 
 
     return $cursor;    
@@ -607,7 +607,7 @@ function get_string_plant_plant_interactor(array $transcript_id, MongoCollection
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Transcript ID'=>array('$in'=>$transcript_id))),
             array('$project' => array('mapping_file.Transcript ID list'=>1,'origin'=>1,'_id'=>0))
-        ));
+        ), array('cursor' => ["batchSize" => 20]));
     
     //var_dump($cursor);
     return $cursor;    
@@ -626,8 +626,7 @@ function get_best_Scored_genes_for_all_species(MongoCollection $full_mappingsCol
            'genes'=> array( '$addToSet'=> '$mapping_file.Gene ID' )
          )
      )
-   )
-    );
+   ), array('cursor' => ["batchSize" => 20]));
    return $cursor;
    
        
@@ -742,9 +741,9 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
                 array('$unwind'=>'$mapping_file'), 
                 array('$match'=> array('$or'=> array(array('mapping_file.Host_symbol'=>$symbol),array('mapping_file.Host_symbol'=>$gene_alias[0]),array('mapping_file.Host_symbol'=>$descriptions[0])))),
                 array('$project' => array('mapping_file.Host_symbol'=>1,'mapping_file.Virus_symbol'=>1,'mapping_file.Putative_function'=>1,'mapping_file.host'=>1,'mapping_file.Accession_number'=>1,'mapping_file.Reference'=>1,'mapping_file.virus'=>1,'mapping_file.method'=>1,'_id'=>0)), 
-            ));
-            if (count($cursor['result'])!=0){
-                for ($i = 0; $i < count($cursor['result']); $i++) {
+            ), array('cursor' => ["batchSize" => 20]));
+            if (count($cursor['cursor']['firstBatch'])!=0){
+                for ($i = 0; $i < count($cursor['cursor']['firstBatch']); $i++) {
                     $mapping_file=$cursor['result'][$i]['mapping_file'];
 
                     $tmp_array=array();
@@ -795,14 +794,14 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
                         array('$unwind'=>'$mapping_file'), 
                         array('$match'=> array('mapping_file.OFFICIAL_SYMBOL_A'=>$symbol)),
                         array('$project' => array('mapping_file.INTERACTOR_A'=>1,'mapping_file.INTERACTOR_B'=>1,'mapping_file.OFFICIAL_SYMBOL_A'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'species'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'_id'=>0))
-                    ));
+                    ), array('cursor' => ["batchSize" => 20]));
                 }
                 else{
                    $cursor1=$interactionsCollection->aggregate(array( 
                         array('$unwind'=>'$mapping_file'), 
                         array('$match'=> array('$or'=> array(array('mapping_file.OFFICIAL_SYMBOL_A'=>$symbol),array('mapping_file.OFFICIAL_SYMBOL_A'=>$descriptions[0])))),
                         array('$project' => array('mapping_file.INTERACTOR_A'=>1,'mapping_file.INTERACTOR_B'=>1,'mapping_file.OFFICIAL_SYMBOL_A'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'species'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'_id'=>0))
-                    )); 
+                    ), array('cursor' => ["batchSize" => 20])); 
                 }    
             }
             else{
@@ -811,24 +810,24 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
                     array('$unwind'=>'$mapping_file'), 
                     array('$match'=> array('$or'=> array(array('mapping_file.OFFICIAL_SYMBOL_A'=>$symbol),array('mapping_file.OFFICIAL_SYMBOL_A'=>$gene_alias[0])))),
                     array('$project' => array('mapping_file.INTERACTOR_A'=>1,'mapping_file.INTERACTOR_B'=>1,'mapping_file.OFFICIAL_SYMBOL_A'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'species'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'_id'=>0))
-                )); 
+                ), array('cursor' => ["batchSize" => 20])); 
                 }
                 else{
                     $cursor1=$interactionsCollection->aggregate(array( 
                     array('$unwind'=>'$mapping_file'), 
                     array('$match'=> array('$or'=> array(array('mapping_file.OFFICIAL_SYMBOL_A'=>$symbol),array('mapping_file.OFFICIAL_SYMBOL_A'=>$gene_alias[0]),array('mapping_file.OFFICIAL_SYMBOL_A'=>$descriptions[0])))),
                     array('$project' => array('mapping_file.INTERACTOR_A'=>1,'mapping_file.INTERACTOR_B'=>1,'mapping_file.OFFICIAL_SYMBOL_A'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'species'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'_id'=>0))
-                )); 
+                ), array('cursor' => ["batchSize" => 20])); 
                 }
                    
             }
             
             
-            if (count($cursor1['result'])!=0){
+            if (count($cursor1['cursor']['firstBatch'])!=0){
                 //echo '<h2> interactions was found for this gene '.$symbol.'</h2>';
                 //var_dump($cursor);
                 //echo '<dl class="dl-horizontal">';
-                for ($i = 0; $i < count($cursor1['result']); $i++) {
+                for ($i = 0; $i < count($cursor1['cursor']['firstBatch']); $i++) {
                     
                     $mapping_file=$cursor1['result'][$i]['mapping_file'];
                     $species=$cursor1['result'][$i]['species'];
@@ -841,21 +840,8 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
                     array_push($biogrid_int_array, $tmp_array);				
 
                 }
-                //echo "tmp_array :". count($tmp_array);
-                //echo "biogrid_int_array :". count($biogrid_int_array);
             }
-
-
-            
         }
-//        $timeend=microtime(true);
-//        $time=$timeend-$timestart;
-//        //Afficher le temps d'éxecution
-//        $page_load_time = number_format($time, 3);
-//        echo "Script starting at: ".date("H:i:s", $timestart);
-//        echo "<br>Script ending at: ".date("H:i:s", $timeend);
-//        echo "<br>Script for building array function executed in " . $page_load_time . " sec";
-		
 	}
     array_push($global_interact_array, $lit_int_array);
     foreach ($gene_id as $gene){
@@ -866,10 +852,10 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
                 array('$unwind'=>'$mapping_file'), 
                 array('$match'=> array('$or'=> array(array('mapping_file.OFFICIAL_SYMBOL_A'=>$symbol[0]),array('mapping_file.INTERACTOR_A'=>$gene_id[0])))),
                 array('$project' => array('mapping_file.INTERACTOR_A'=>1,'mapping_file.INTERACTOR_B'=>1,'mapping_file.OFFICIAL_SYMBOL_A'=>1,'mapping_file.OFFICIAL_SYMBOL_B'=>1,'species'=>1,'mapping_file.SOURCE'=>1,'mapping_file.PUBMED_ID'=>1,'mapping_file.EXPERIMENTAL_SYSTEM'=>1,'_id'=>0))
-            ));
-            if (count($cursor1['result'])!=0){
+            ), array('cursor' => ["batchSize" => 20]));
+            if (count($cursor1['cursor']['firstBatch'])!=0){
                
-                for ($i = 0; $i < count($cursor1['result']); $i++) {
+                for ($i = 0; $i < count($cursor1['cursor']['firstBatch']); $i++) {
                     
                     $mapping_file=$cursor1['result'][$i]['mapping_file'];
                     $species=$cursor1['result'][$i]['species'];
@@ -883,12 +869,6 @@ function get_interactor(array $gene_id,array $gene_alias,array $descriptions,arr
        }
     } 
     array_push($global_interact_array, $biogrid_int_array);
-    
-    
-    
-    
-    
-    
     
 /*    $timeend=microtime(true);
 //    $time=$timeend-$timestart;
@@ -907,8 +887,8 @@ function count_transcript_for_gene(Mongocollection $sequencesCollection,array $g
         array('$unwind'=>'$mapping_file'), 
         array('$match'=> array('$or'=> array( array('mapping_file.Gene ID'=>array('$in'=>$gene_id)),array('mapping_file.Gene ID'=>array('$in'=>$gene_id_bis))))),
         array('$project'=> array('mapping_file.Transcript ID' => 1,'_id'=>0))
-    ));
-    foreach ($sequences_cursor['result'] as $result) {
+    ), array('cursor' => ["batchSize" => 20]));
+    foreach ($sequences_cursor['cursor']['firstBatch'] as $result) {
 
             array_push($transcript_count, $result['mapping_file']['Transcript ID']);
     } 
@@ -929,19 +909,6 @@ function get_plaza_orthologs(MongoGridFS $grid,Mongocollection $or, $species='nu
                   $file_path=$filename;
                     //echo $filename;
 				}
-			#foreach ($value as $filename ){
-			#		echo $filename;
-			
-			
-		
-			// foreach ($value as $keys=>$values ){
-// 				echo $keys;
-// 				echo $values;
-// 				$filename=$keys;
-// 				#if ($keys=="file"){
-// 				#	$filename=$values;
-// 				#	echo $values;
-// 				#}
 			}
 		}
 	}
@@ -966,7 +933,7 @@ function get_all_synonyms(Mongocollection $sp, $key='null', $value='null'){
         array('$match' => array($key => $value)),
         array('$unwind' => '$aliases'),
         array('$project' => array('aliases' => 1,'full_name' => 1,'name' => 1,'abbrev_name' => 1, '_id' => 0))
-        ));
+        ), array('cursor' => ["batchSize" => 20]));
     }
     catch ( MongoConnectionException $e )
     {
@@ -989,19 +956,6 @@ function get_grid_file(MongoGridFS $grid,Mongocollection $collection,$species='n
                   $file_path=$filename;
                     //echo $filename;
 				}
-			#foreach ($value as $filename ){
-			#		echo $filename;
-			
-			
-			
-			// foreach ($value as $keys=>$values ){
-// 				echo $keys;
-// 				echo $values;
-// 				$filename=$keys;
-// 				#if ($keys=="file"){
-// 				#	$filename=$values;
-// 				#	echo $values;
-// 				#}
 			}
 		}
 	}
@@ -1036,10 +990,6 @@ function read_grid_plaza_mapping_file(MongoGridFS $grid, MongoCollection $mappin
     echo "<br>Fin du script: ".date("H:i:s", $timeend1);
     echo "<br>Script read grid plaza file search species execute en " . $page_load_time . " sec";
     echo '<hr>';
-       
-       
-            
-                                   
              
     foreach($MongoGridFSCursor as $MongoGridFSFile) {
         echo 'reading grid file';
@@ -1075,10 +1025,6 @@ function read_grid_plaza_mapping_file(MongoGridFS $grid, MongoCollection $mappin
                         array_push($already_added_go_terms, str_replace("\"", "", $row[3]));
 
                     }
-
-
-
-                    //echo 'test'.$row[0].'-'.$row[3].'-'.$row[4].'-'.$row[5].'<br>';
 
                 }
                 $cpt++;
@@ -1150,11 +1096,6 @@ function read_grid_mapping_file(MongoGridFS $grid, MongoCollection $mappingsColl
                                 array_push($already_added_go_terms, $row[5]);
 
                             }
-                            
-                            
-                            
-                            //echo 'test'.$row[0].'-'.$row[3].'-'.$row[4].'-'.$row[5].'<br>';
-
                         }
                         $cpt++;
                     }
@@ -1167,13 +1108,7 @@ function read_grid_mapping_file(MongoGridFS $grid, MongoCollection $mappingsColl
 
 }
 function get_ortholog_table(MongoCollection $full_mappingsCollection, Mongocollection $orthologsCollection,$speciesID='null',$current_plaza_id='null'){
-//	echo '<div class="tinted-box no-top-margin bg-gray" style="border:2px solid grey text-align: center">';
-//	echo'<h1 style="text-align:center"> Orthology informations </h1>';
-//	echo '</div>';
-   
-	#$current_plaza_id="AT1G01060";
-    #echo "test plaza id ".$current_plaza_id;
-    //$initial_species=array('Arabidopsis thaliana' => 'AT','Cucumis melo' => 'CM','Hordeum vulgare' => 'HV','Solanum lycopersicum' => 'SL','Prunus persica' => 'PP');
+
     $ortholog_list_id=array();
     $table_string="";
     if ($current_plaza_id!=""){
@@ -1194,9 +1129,6 @@ function get_ortholog_table(MongoCollection $full_mappingsCollection, Mongocolle
                 }
             }
         }
-        #echo $ortholog_list_id[0];
-        #echo $ortholog_list_id[1];
-
 
         $table_string.='<table class="table" id="orthologs_table">'
                 . '<thead>'
@@ -1212,56 +1144,6 @@ function get_ortholog_table(MongoCollection $full_mappingsCollection, Mongocolle
         foreach ($ortholog_list_id as $ortholog){
             #echo $ortholog;
             if ($ortholog!=$current_plaza_id){
-            /*$cursor_score=$full_mappingsCollection->aggregate(array(
-            array('$match' => array('type'=>'full_table')),  
-            array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-            array('$unwind'=>'$mapping_file'),
-            array('$match' => array('mapping_file.Plaza ID'=>$ortholog)),
-            array(
-              '$group'=>
-                array(
-                  '_id'=> array( 'gene'=> '$mapping_file.Gene ID' ),
-                  'scores'=> array('$addToSet'=> '$mapping_file.Score' )
-                )
-            )
-   
-            ));
-            foreach ($cursor_score['result'] as $value) {
-                foreach ($value['scores'] as $tmp_score) {    
-                    $score+=$tmp_score;    
-                }  
-            } */
-/*                $score=0.0;
-//                $cursor_score=$full_mappingsCollection->aggregate(array(
-//                    array('$match' => array('type'=>'full_table','species'=>$speciesID)),  
-//                    array('$project' => array('mapping_file'=>1,'_id'=>0)),
-//                    array('$unwind'=>'$mapping_file'),
-//                    array('$match' => array('mapping_file.Plaza ID'=>$ortholog)),
-//                    array(
-//                      '$group'=>
-//                        array(
-//                          '_id'=> array( 'gene'=> '$mapping_file.Gene ID' ),
-//                          //'scores'=> array('$addToSet'=> '$mapping_file.Score_exp')
-//
-//                          'scores'=> array('$addToSet'=> array('exp'=>'$mapping_file.Score_exp','int'=>'$mapping_file.Score_int','ort'=>'$mapping_file.Score_orthologs','qtl'=>'$mapping_file.Score_QTL','snp'=>'$mapping_file.Score_SNP') )
-//                        )
-//                    )
-//
-//               ));
-//   
-//                ///////////////////////////////
-//                //SUM ALL SCORE FOR THIS GENE//
-//                ///////////////////////////////   
-//                foreach ($cursor_score['result'] as $value) {
-//                    foreach ($value['scores'] as $tmp_score) {    
-//                        $score+=$tmp_score['exp'];
-//                        $score+=$tmp_score['int'];  
-//                        $score+=$tmp_score['ort'];  
-//                        $score+=$tmp_score['qtl'];  
-//                        $score+=$tmp_score['snp'];  
-//                    }  
-                } */
-                
                 $ortholog_data=$full_mappingsCollection->find(array('mapping_file.Plaza ID'=>$ortholog),array('mapping_file.$'=>1,'species'=>1,'_id'=>0));
                 foreach ($ortholog_data as $data){
                     $species=$data['species'];
@@ -1309,45 +1191,6 @@ function get_ortholog_table(MongoCollection $full_mappingsCollection, Mongocolle
                     }
                 }
             }
-            
-
-
-/*                $tgt=$mappingsCollection->aggregate(array(
-//                array('$match' => array('type'=>'full_table')),  
-//                array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-//                array('$unwind'=>'$mapping_file'),
-//                array('$match' => array('$or'=> array(array('mapping_file.Plaza ID'=>$ortholog),array('mapping_file.Protein ID'=>$ortholog),array('mapping_file.Alias'=>$ortholog),array('mapping_file.Probe ID'=>$ortholog),array('mapping_file.Gene ID'=>$ortholog),array('mapping_file.Gene ID 2'=>$ortholog)))),
-//                array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0)))); 
-//
-//                foreach($tgt['result'] as $line) {
-//
-//                    //echo $line['species'];
-//                    $table_string.="<tr>";
-//                    
-//                    $table_string.='<td><a class="nowrap" href="https://services.cbib.u-bordeaux2.fr/cobra/src/result_search_5.php?organism='.$line['species'].'&search='.$line['mapping_file']['Gene ID'].'">'.$line['mapping_file']['Gene ID'].'</a></td>';
-//                    //$table_string.='<td>'.$line['mapping_file']['Gene ID'].'</td>';
-//                    //echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-//                    $table_string.='<td><a class="nowrap" href="http://www.uniprot.org/uniprot/'.$line['mapping_file']['Uniprot ID'].'">'.$line['mapping_file']['Uniprot ID'].'</a></td>';
-//
-//                    //$table_string.='<td>'.$line['mapping_file']['Uniprot ID'].'</td>';
-//
-//                    $table_string.='<td>'.$line['species'].'</td>';
-//                    //echo '<td>'.$line['species'].'</td>';
-//                    $table_string.="</tr>";
-//
-//
-//
-//                }                         
-       
-        //}
-//        $timeend=microtime(true);
-//        $time=$timeend-$timestart;
-//
-//        //Afficher le temps d'éxecution
-//        $page_load_time = number_format($time, 3);
-//        echo "Debut du script dans get_orthologs: ".date("H:i:s", $timestart);
-//        echo "<br>Fin du script: ".date("H:i:s", $timeend);
-//        echo "<br>Script  execute en " . $page_load_time . " sec";*/
         }
         $table_string.='</tbody>';
         $table_string.='</table>';
@@ -1358,25 +1201,10 @@ function get_ortholog_table(MongoCollection $full_mappingsCollection, Mongocolle
                               
 }
 function get_all_orthologs(MongoGridFS $grid, MongoCollection $mappingsCollection, Mongocollection $orthologsCollection,$speciesID='null',$current_plaza_id='null'){
-//	echo '<div class="tinted-box no-top-margin bg-gray" style="border:2px solid grey text-align: center">';
-//	echo'<h1 style="text-align:center"> Orthology informations </h1>';
-//	echo '</div>';
-     //echo "test plaza id ".$current_plaza_id;
-    //$initial_species=array('Arabidopsis thaliana' => 'AT','Cucumis melo' => 'CM','Hordeum vulgare' => 'HV','Solanum lycopersicum' => 'SL');
+
     $table_string="";
     //echo 'current_plaza_id: '.$current_plaza_id;
     if ($current_plaza_id!=""){
-        
-//        $cursors=$orthologsCollection->find(array('mapping_file.Plaza gene id'=>$current_plaza_id),array('mapping_file.$'=>1,'_id'=>0));
-//        foreach ($cursors as $cursor){
-//            foreach ($cursor as $mapping_file){
-//                foreach ($mapping_file as $value){
-//                    //$ortholog_list_id=$value['orthologs_list_identifier'];
-//                    $ortholog_list_id=split('[,]', $value['orthologs_list_identifier']);
-//                }
-//            }
-//        }
-        //echo 'current_plaza_id: '.$current_plaza_id;
         
         $cursors=$orthologsCollection->aggregate(array(
             array('$match'=>array('species'=>$speciesID)),
@@ -1384,309 +1212,68 @@ function get_all_orthologs(MongoGridFS $grid, MongoCollection $mappingsCollectio
             array('$unwind'=>'$mapping_file'),
             array('$match' => array('mapping_file.Plaza gene id'=>$current_plaza_id)),
             array('$project' => array('mapping_file.orthologs_list_identifier'=>1,'_id'=>0))
-        ));
+        ), array('cursor' => ["batchSize" => 20]));
         //var_dump($cursors);
-        foreach ($cursors['result'] as $values) {
+        foreach ($cursors['cursor']['firstBatch'] as $values) {
             $ortholog_list_id=$values['mapping_file']['orthologs_list_identifier'];
             //echo 'ortholog list : '.$ortholog_list_id;
             $ortholog_list_id=split('[,]', $ortholog_list_id);
             foreach ($ortholog_list_id as $ortholog){
-                //echo 'ortholog'.$ortholog;
-                //foreach ($initial_species as $key => $value) {
-                    //if ($value==$ortholog[0].$ortholog[1] && $ortholog[2]!='R'){
-                        #echo "start line : ".$buffer."\n";
-                        $cursor=$mappingsCollection->aggregate(array( 
-                            array('$match' => array('key'=>'PLAZA_conversion')),  
-                            array('$project' => array('src_to_tgt'=>1,'species'=>1,'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'_id'=>0)),    
-                            array('$match' => array('src'=>"Plaza gene id")),  
-                            array('$unwind'=>'$src_to_tgt'),    
-                            array('$match' => array('src_to_tgt.0'=>$ortholog)),  
-                            array('$project' => array('src_to_tgt'=>1,'species'=>1, 'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'_id'=>0))
-                        ));
+                $cursor=$mappingsCollection->aggregate(array( 
+                    array('$match' => array('key'=>'PLAZA_conversion')),  
+                    array('$project' => array('src_to_tgt'=>1,'species'=>1,'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'_id'=>0)),    
+                    array('$match' => array('src'=>"Plaza gene id")),  
+                    array('$unwind'=>'$src_to_tgt'),    
+                    array('$match' => array('src_to_tgt.0'=>$ortholog)),  
+                    array('$project' => array('src_to_tgt'=>1,'species'=>1, 'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'_id'=>0))
+                ), array('cursor' => ["batchSize" => 20]));
 
-                        if (count($cursor['result'])!=0){
+                if (count($cursor['cursor']['firstBatch'])!=0){
 
+                    foreach($cursor['cursor']['firstBatch'] as $line) {
 
-                            foreach($cursor['result'] as $line) {
+                        //echo $line['src_to_tgt'];
+                        for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
+                            $table_string.="<tr>";
+                            $table_string.='<td>'.$line['src_to_tgt'][0].'</td>';
+                            $table_string.='<td>'.$line['src_version'].'</td>';
+                            if ($line['species']=="Arabidopsis thaliana"){
+                                
+                                //$table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
+                                $table_string.='<td><a href=http://www.uniprot.org/uniprot/'.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
 
-                                //echo $line['src_to_tgt'];
-                                for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-                                    $table_string.="<tr>";
-                                    $table_string.='<td>'.$line['src_to_tgt'][0].'</td>';
-                                    $table_string.='<td>'.$line['src_version'].'</td>';
-                                    if ($line['species']=="Arabidopsis thaliana"){
-                                        
-                                        //$table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
-                                        $table_string.='<td><a href=http://www.uniprot.org/uniprot/'.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
+                            }
+                            else if ($line['species']=="Cucumis melo"){
+                                $table_string.='<td><a href=https://melonomics.net/feature/'.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
+                                
+                            }
+                            else if ($line['species']=="Solanum lycopersicum"){
+                                //$table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
+                                $table_string.='<td><a href=http://solcyc.solgenomics.net/LYCO/NEW-IMAGE?type=GENE-IN-MAP&object='.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
 
-                                    }
-                                    else if ($line['species']=="Cucumis melo"){
-                                        $table_string.='<td><a href=https://melonomics.net/feature/'.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
-                                        
-                                    }
-                                    else if ($line['species']=="Solanum lycopersicum"){
-                                        //$table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
-                                        $table_string.='<td><a href=http://solcyc.solgenomics.net/LYCO/NEW-IMAGE?type=GENE-IN-MAP&object='.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
+                          
+                            }
+                            else if ($line['species']=="Prunus persica"){
+                                $table_string.='<td><a href=http://pathways.rosaceae.org/PEACH/search-query?type=GENE&gname='.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
 
-                                  
-                                    }
-                                    else if ($line['species']=="Prunus persica"){
-                                        $table_string.='<td><a href=http://pathways.rosaceae.org/PEACH/search-query?type=GENE&gname='.$line['src_to_tgt'][1][$i].'>'.$line['src_to_tgt'][1][$i].'</a></td>';
+                            }
+                                
+                            else{
+                                $table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
+                            }
+                            $table_string.='<td>'.$line['tgt'].'</td>';
+                            $table_string.='<td>'.$line['species'].'</td>';
+                            $table_string.="<tr>";
 
-                                    }
-                                        
-                                    else{
-                                        $table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
-                                    }
-                                    $table_string.='<td>'.$line['tgt'].'</td>';
-                                    $table_string.='<td>'.$line['species'].'</td>';
-                                    $table_string.="<tr>";
-
-                                }
-                            }                                                                                                                                                                            
-//                                        echo '<h2> orthologs table </h2> <div class="container">';
-//                                        echo'<table id="example3" class="table table-bordered" cellspacing="0" width="100%">';
-//                                        echo'<thead><tr>';
-//
-//                                        //recupere le titre
-//                                        #echo "<th>type</th>";
-//                                        echo "<th>Mapping type</th>";
-//                                        echo "<th>src ID</th>";
-//                                        echo "<th>src type</th>";
-//                                        echo "<th>src_version</th>";
-//                                        echo "<th>tgt ID</th>";
-//                                        echo "<th>tgt type</th>";
-//                                        echo "<th>tgt_version</th>";
-//                                        echo "<th>species</th>";
-//
-//                                        echo'</tr></thead>';
-//
-//                                        //Debut du corps de la table
-//                                        echo'<tbody>';
-//
-//                                        foreach($cursor['result'] as $line) {
-//
-//                                            //echo $line['src_to_tgt'];
-//                                            for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//                                                echo "<tr>";
-//
-//                                                echo '<td>'.$line['type'].'</td>';
-//
-//                                                echo '<td>'.$line['src_to_tgt'][0].'</td>';
-//                                                echo '<td>'.$line['src'].'</td>';
-//                                                echo '<td>'.$line['src_version'].'</td>';
-//
-//                                                //for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//
-//                                                echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-//
-//
-//                                                //}
-//                                                echo '<td>'.$line['tgt'].'</td>';
-//                                                echo '<td>'.$line['tgt_version'].'</td>';
-//                                                echo '<td>'.$line['species'].'</td>';
-//                                                echo "</tr>";
-//                                            }
-//
-//                                        }
-//                                        echo'</tbody></table></div>'; 
-                        }                                   														
-                    //}
-
-                //}                          
+                        }
+                    }
+                }                       
  			}
         }
     }
-    
-    
-    
-    
-    #old way to perform research
-	#$current_plaza_id="AT1G01060";
-    /*$initial_species=array('AT','CM','HV','SL');
-    $table_string="";
-	if ($current_plaza_id!=""){
-
-		$MongoGridFSCursor=get_plaza_orthologs($grid, $orthologsCollection,$speciesID,$current_plaza_id,'Plaza gene id');
-		#$MongoGridFSCursor->skip(3)->limit(8);
-		foreach($MongoGridFSCursor as $MongoGridFSFile) {
-			#error_log($MongoGridFSFile->getBytes(), 0);
-			$stream = $MongoGridFSFile->getResource();
- 			if ($stream) {
-     			#while (($buffer = fgets($stream, 4096)) !== false) {
-	     		
-	     		while (($buffer = stream_get_line($stream, 1024, "\n")) !== false) {
-         			#echo "start line : ".$buffer."\n";
-					#$row=split('[\t]', $buffer);
-					$row=preg_split('/\s+/', $buffer);
-					if ($current_plaza_id==$row[0]){
-						#echo "start line : ".$buffer."\n";
-						$ortholog_list_id=split('[,]', $row[1]);
-						foreach ($ortholog_list_id as $ortholog){
-                            foreach ($initial_species as $value) {
-                                if ($value==$ortholog[0].$ortholog[1] && $ortholog[2]!='R'){
-                                    #echo "start line : ".$buffer."\n";
-                                    $cursor=$mappingsCollection->aggregate(array( 
-                                        array('$match' => array('type'=>'gene_to_prot')),  
-                                        array('$project' => array('src_to_tgt'=>1,'species'=>1,'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'type'=>1,'_id'=>0)),    
-                                        array('$match' => array('src'=>"Plaza gene id")),  
-                                        array('$unwind'=>'$src_to_tgt'),    
-                                        array('$match' => array('src_to_tgt.0'=>$ortholog)),  
-                                        array('$project' => array('src_to_tgt'=>1,'species'=>1, 'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'type'=>1,'_id'=>0))
-                                    ));
-                                    
-                                    if (count($cursor['result'])!=0){
-                                          
-                               
-                                        foreach($cursor['result'] as $line) {
-
-                                            //echo $line['src_to_tgt'];
-                                            for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-                                                $table_string.="<tr>";
-                                                //echo "<tr>";
-                                                $table_string.='<td>'.$line['type'].'</td>';
-                                                //echo '<td>'.$line['type'].'</td>';
-                                                $table_string.='<td>'.$line['src_to_tgt'][0].'</td>';
-                                                //echo '<td>'.$line['src_to_tgt'][0].'</td>';
-                                                $table_string.='<td>'.$line['src'].'</td>';
-                                                //echo '<td>'.$line['src'].'</td>';
-                                                $table_string.='<td>'.$line['src_version'].'</td>';
-                                                //echo '<td>'.$line['src_version'].'</td>';
-                                                $table_string.='<td>'.$line['src_to_tgt'][1][$i].'</td>';
-                                                //echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-                                                $table_string.='<td>'.$line['tgt'].'</td>';
-                                                //echo '<td>'.$line['tgt'].'</td>';
-                                                $table_string.='<td>'.$line['tgt_version'].'</td>';
-                                                //echo '<td>'.$line['tgt_version'].'</td>';
-                                                $table_string.='<td>'.$line['species'].'</td>';
-                                                //echo '<td>'.$line['species'].'</td>';
-                                                $table_string.="<tr>";
-                                                //echo "</tr>";
-                                              
-                                            }
-                                        }                                                                                                                                                                            
-//                                        echo '<h2> orthologs table </h2> <div class="container">';
-//                                        echo'<table id="example3" class="table table-bordered" cellspacing="0" width="100%">';
-//                                        echo'<thead><tr>';
-//
-//                                        //recupere le titre
-//                                        #echo "<th>type</th>";
-//                                        echo "<th>Mapping type</th>";
-//                                        echo "<th>src ID</th>";
-//                                        echo "<th>src type</th>";
-//                                        echo "<th>src_version</th>";
-//                                        echo "<th>tgt ID</th>";
-//                                        echo "<th>tgt type</th>";
-//                                        echo "<th>tgt_version</th>";
-//                                        echo "<th>species</th>";
-//
-//                                        echo'</tr></thead>';
-//
-//                                        //Debut du corps de la table
-//                                        echo'<tbody>';
-//
-//                                        foreach($cursor['result'] as $line) {
-//
-//                                            //echo $line['src_to_tgt'];
-//                                            for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//                                                echo "<tr>";
-//
-//                                                echo '<td>'.$line['type'].'</td>';
-//
-//                                                echo '<td>'.$line['src_to_tgt'][0].'</td>';
-//                                                echo '<td>'.$line['src'].'</td>';
-//                                                echo '<td>'.$line['src_version'].'</td>';
-//
-//                                                //for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//
-//                                                echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-//
-//
-//                                                //}
-//                                                echo '<td>'.$line['tgt'].'</td>';
-//                                                echo '<td>'.$line['tgt_version'].'</td>';
-//                                                echo '<td>'.$line['species'].'</td>';
-//                                                echo "</tr>";
-//                                            }
-//
-//                                        }
-//                                        echo'</tbody></table></div>'; 
-                                    }                                   														
-                                }
-                            }                          
- 						}
-					}
-				}
-			}
-		}
-	}*/
     return $table_string;                           
-//							#echo "start line : ".$buffer."\n";
-//							$cursor=$mappingsCollection->aggregate(array( 
-//								array('$match' => array('type'=>'gene_to_prot')),  
-//								array('$project' => array('src_to_tgt'=>1,'species'=>1,'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'type'=>1,'_id'=>0)),    
-//								array('$match' => array('src'=>"Plaza gene id")),  
-//								array('$unwind'=>'$src_to_tgt'),    
-//								array('$match' => array('src_to_tgt.0'=>$ortholog)),  
-//								array('$project' => array('src_to_tgt'=>1,'species'=>1, 'src'=>1, 'src_version'=>1,'tgt'=>1,'tgt_version'=>1,'type'=>1,'_id'=>0))
-//							));
-//							
-//							if (count($cursor['result'])!=0){
-//								echo '<h2> orthologs table </h2> <div class="container">';
-//								echo'<table id="example3" class="table table-bordered" cellspacing="0" width="100%">';
-//								echo'<thead><tr>';
-//
-//								//recupere le titre
-//								#echo "<th>type</th>";
-//								echo "<th>Mapping type</th>";
-//								echo "<th>src ID</th>";
-//								echo "<th>src type</th>";
-//								echo "<th>src_version</th>";
-//								echo "<th>tgt ID</th>";
-//								echo "<th>tgt type</th>";
-//								echo "<th>tgt_version</th>";
-//								echo "<th>species</th>";
-//								
-//								echo'</tr></thead>';
-//
-//								//Debut du corps de la table
-//								echo'<tbody>';
-//
-//								foreach($cursor['result'] as $line) {
-//
-//									//echo $line['src_to_tgt'];
-//									for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//										echo "<tr>";
-//										
-//										echo '<td>'.$line['type'].'</td>';
-//
-//										echo '<td>'.$line['src_to_tgt'][0].'</td>';
-//										echo '<td>'.$line['src'].'</td>';
-//										echo '<td>'.$line['src_version'].'</td>';
-//
-//										//for ($i = 0; $i < count($line['src_to_tgt'][1]); $i++) {
-//
-//										echo '<td>'.$line['src_to_tgt'][1][$i].'</td>';
-//		
-//	
-//										//}
-//										echo '<td>'.$line['tgt'].'</td>';
-//										echo '<td>'.$line['tgt_version'].'</td>';
-//										echo '<td>'.$line['species'].'</td>';
-//										echo "</tr>";
-//									}
-//
-//								}
-//								echo'</tbody></table></div>';
-//								
-//								#echo $ortholog."\n";
-//								#var_dump($cursor);
-//								#echo "\n";
-//							}
-							
-							
-
 }
+
 ### Find all aliases
 function find_description_by_regex(MongoCollection $sa,MongoRegex $re){
 
@@ -2724,81 +2311,11 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 
 			foreach ( $cursor2 as $doc ){
 			
-
-				#$gene=$doc['gene'];
-			
-			
 				$cursor['result'][$i]['gene']=$doc['gene'];
 			
-			
-				/*
-			
-				foreach ( $result as $docs){
-					#echo $docs;
-					foreach ( $docs as $array => $src_to_tgt ){
-
-						foreach ( $src_to_tgt as $src => $tgt){
-							#echo "src_to_tgt---".$src_to_tgt[0];
-							#echo "tgt[0]---".$tgt[0];
-							#foreach ( $tgt as $srcs => $tgts){
-								if ($src_to_tgt[0]==$gene){
-									#echo $gene;
-									$cursor['result'][$i]['uniprot preferred id']=$tgt[0];
-
-								}
-							#}
-					
-						}
-					}
-			
-
-				}
-				*/
-			
-				//echo $result;
-				/*
-				foreach ( $result as $id => $value ){
-					echo "$id: ";
-					#var_dump( $value );
-				
-					$src_to_tgt=array();
-					$src_to_tgt=$value;
-				
-					foreach ( $src_to_tgt as $array => $src_to_tgt){
-					
-					
-						foreach ( $source as $array => $src_to_tgt ){
-						
-							foreach ( $src_to_tgt as $src => $tgt ){
-								if ($tgt[0]==$gene){
-									//echo $tgt[0]."-----";
-									echo $tgt[1][0];
-							
-									$cursor['result'][$i]['prot preferred id']=$tgt[1][0];
-
-							
-					
-								}
-							}
-						}
-					
-					}
-				
-				}
-			
-			
-			
-				#foreach ( $src_to_tgt as $docs){
-		
-				#}*/
-			
 			}
-		
-
 		 
 		}
-	
-		#echo "end";
 	
 	
 		#$cursor->limit(1000);
@@ -2810,74 +2327,21 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 			#echo "entering search gene for results".$i;
 		
 			$gene=$cursor['result'][$i]['gene'];
-			//$cursor1=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-			//$cursorprot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-				#print_r($cursorprot);
-				//var_dump($cursorprot->getNext());
-				#$result=array();
 		
 			foreach ( $result as $docs){
 				#echo $docs;
 				foreach ( $docs as $array => $src_to_tgt ){
 
 					foreach ( $src_to_tgt as $src => $tgt){
-						#echo "src_to_tgt---".$src_to_tgt[0];
-						#echo "tgt[0]---".$tgt[0];
-						#foreach ( $tgt as $srcs => $tgts){
-							if ($src_to_tgt[0]==$gene){
-								#echo $gene;
-								$cursor['result'][$i]['prot preferred id']=$tgt[0];
+						if ($src_to_tgt[0]==$gene){
+							#echo $gene;
+							$cursor['result'][$i]['prot preferred id']=$tgt[0];
 
-							}
-						#}
-					
-					}
-				}
-
-			}
-		
-		}
-    
-    	/*
-    	#$text=$cursor['result'][$i][0];
-    	#echo 'text :'.$text;
-    	$gene=$cursor['result'][$i]['species preferred gene id'];
-    	$cursor_prot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-		echo "count".count($cursor_prot);
-    	foreach ( $cursor_prot as $results){
-    			#for ($j = 0; $j < count($docs['src_to_tgt']); $j++) {
-
-    				#echo "entering search prot";
-    				#$results=$docs['src_to_tgt'][$j];
-    		
-    		foreach ( $results as $docs => $source){
-    				
-    			foreach ( $source as $array => $src_to_tgt ){
-						
-					foreach ( $src_to_tgt as $src => $tgt ){
-						#echo $tgt[0]."-----";
-						if ($tgt[0]==$gene){
-							echo $tgt[0]."-----";
-							echo $tgt[1][0];
-							
-							$cursor['result'][$i]['prot preferred id']=$tgt[1][0];
-
-							
-					
 						}
-					
 					}
-						
 				}
 			}
-				
-					
 		}
-
-				
-				
-	}
-*/
 	}
 	else if($species=='Solanum lycopersicum'){
 		if ($species =='null' && $virus == 'null'){
@@ -2996,22 +2460,6 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 	
 			}
 		}
-		#$cursor->maxTimeMS(30000000);
-		#$cursor->maxTimeMS(10);
-	   # $cursor->limit(1000);
-		#$cursor_prot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-		#$cursorprot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-		#$cursorprot->limit(100);
-				#$array=iterator_to_array($cursorprot);
-		#print_r(iterator_to_array($cursorprot));
-		#$array_gene_to_prot=iterator_to_array($cursorprot[0]['src_to_tgt']);
-	
-	
-	
-		#$cursorprot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-		#$cursorprot->maxTimeMS(300000);
-
-		#$result = $cursorprot->getNext();
 		for ($i = 0; $i < count($cursor['result']); $i++) {
 		#for ($i = 0; $i < 1000; $i++) {
 			
@@ -3026,74 +2474,7 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 
 			foreach ( $cursor2 as $doc ){
 			
-
-				#$gene=$doc['gene'];
-			
-			
 				$cursor['result'][$i]['gene']=$doc['gene'];
-			
-			
-				/*
-			
-				foreach ( $result as $docs){
-					#echo $docs;
-					foreach ( $docs as $array => $src_to_tgt ){
-
-						foreach ( $src_to_tgt as $src => $tgt){
-							#echo "src_to_tgt---".$src_to_tgt[0];
-							#echo "tgt[0]---".$tgt[0];
-							#foreach ( $tgt as $srcs => $tgts){
-								if ($src_to_tgt[0]==$gene){
-									#echo $gene;
-									$cursor['result'][$i]['uniprot preferred id']=$tgt[0];
-
-								}
-							#}
-					
-						}
-					}
-			
-
-				}
-				*/
-			
-				//echo $result;
-				/*
-				foreach ( $result as $id => $value ){
-					echo "$id: ";
-					#var_dump( $value );
-				
-					$src_to_tgt=array();
-					$src_to_tgt=$value;
-				
-					foreach ( $src_to_tgt as $array => $src_to_tgt){
-					
-					
-						foreach ( $source as $array => $src_to_tgt ){
-						
-							foreach ( $src_to_tgt as $src => $tgt ){
-								if ($tgt[0]==$gene){
-									//echo $tgt[0]."-----";
-									echo $tgt[1][0];
-							
-									$cursor['result'][$i]['prot preferred id']=$tgt[1][0];
-
-							
-					
-								}
-							}
-						}
-					
-					}
-				
-				}
-			
-			
-			
-				#foreach ( $src_to_tgt as $docs){
-		
-				#}*/
-			
 			}
 		
 
@@ -3112,11 +2493,6 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 			#echo "entering search gene for results".$i;
 		
 			$gene=$cursor['result'][$i]['gene'];
-			//$cursor1=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-			//$cursorprot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-				#print_r($cursorprot);
-				//var_dump($cursorprot->getNext());
-				#$result=array();
 		
 			foreach ( $result as $docs){
 				#echo $docs;
@@ -3139,53 +2515,10 @@ function get_all_genes_up_regulated(MongoCollection $me,Mongocollection $sp,Mong
 			}
 		
 		}
-    
-    	/*
-    	#$text=$cursor['result'][$i][0];
-    	#echo 'text :'.$text;
-    	$gene=$cursor['result'][$i]['species preferred gene id'];
-    	$cursor_prot=$ma->find(array('type'=>'gene_to_prot'),array('src_to_tgt'=>1,'_id'=>0));
-		echo "count".count($cursor_prot);
-    	foreach ( $cursor_prot as $results){
-    			#for ($j = 0; $j < count($docs['src_to_tgt']); $j++) {
-
-    				#echo "entering search prot";
-    				#$results=$docs['src_to_tgt'][$j];
-    		
-    		foreach ( $results as $docs => $source){
-    				
-    			foreach ( $source as $array => $src_to_tgt ){
-						
-					foreach ( $src_to_tgt as $src => $tgt ){
-						#echo $tgt[0]."-----";
-						if ($tgt[0]==$gene){
-							echo $tgt[0]."-----";
-							echo $tgt[1][0];
-							
-							$cursor['result'][$i]['prot preferred id']=$tgt[1][0];
-
-							
-					
-						}
-					
-					}
-						
-				}
-			}
-				
-					
-		}
-
-				
-				
 	}
-*/
-	}
-	else{
-	}
+	else{}
     return $cursor;
     
-  
 }
 ### Find all pathogens experimentally infecting any angiosperm
 function get_all_pathogens_infecting_angiosperm(Mongocollection $sp,Mongocollection $sa){
@@ -3320,7 +2653,7 @@ function find_all_species(MongoCollection $sp){
 								)
 					)
 				),
-            array('cursor' => ["batchSize" => 0])
+            array('cursor' => ["batchSize" => 20])
         );	
 	}
     catch ( MongoConnectionException $e )
@@ -3334,71 +2667,49 @@ function find_all_species(MongoCollection $sp){
 function find_top_ranking_S_genes(MongoCollection $full_mappings_collection){
    try
    {
-    $best_scored_genes=$full_mappings_collection->aggregate(
-    array(
-        array('$match' => array('type'=>'full_table')),  
-        array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-        array('$unwind'=>'$mapping_file'),
-        array(
-          '$group'=>
+        $best_scored_genes=$full_mappings_collection->aggregate(array(
+            array('$match' => array('type'=>'full_table')),  
+            array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
+            array('$unwind'=>'$mapping_file'),
             array(
-              '_id'=> array( 'score'=> '$mapping_file.Global_Score' ),
-              'genes'=> array( '$addToSet'=> array('gene_id'=>'$mapping_file.Gene ID','gene_desc'=>'$mapping_file.Description','species'=>'$species'))
-                
-              
-            )
-        ),
-        
-        array('$sort'=>array('_id.score'=>-1)),
-        array('$limit' => 100)
-       
-   )
-   );
-    
-/*    $best_scored_genes=$full_mappings_collection->aggregate(
-//    array(
-//        array('$match' => array('type'=>'full_table')),  
-//        array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-//        array('$unwind'=>'$mapping_file'),
-//        array(
-//          '$group'=>
-//            array(
-//              '_id'=> array( 'score'=> '$mapping_file.Global_Score' ),
-//              'genes'=> array( '$addToSet'=> '$mapping_file.Gene ID')
-//                
-//              
-//            )
-//        ),
-//        array('$sort'=>array('_id.score'=>-1))
-//       
-//   )
-//   );*/
+                '$group'=>array(
+                    '_id'=> array( 'score'=> '$mapping_file.Global_Score' )
+                    // '_id'=> array( 'score'=> '$mapping_file.Global_Score' ),
+                    // 'genes'=> array( '$addToSet'=> array('gene_id'=>'$mapping_file.Gene ID',
+                    //     'gene_desc'=>'$mapping_file.Description',
+                    //     'species'=>'$species')
+                    // )
+                )
+            ),
+            array('$sort'=>array('_id.score'=>-1)),
+            array('$limit' => 100)   
+        ),array('cursor' => ["batchSize" => 100]));
    
-   }
+    }
     catch ( MongoConnectionException $e )
     {
-            echo '<p>Couldn\'t get any scoring values, Do you have data processed?</p>';
-            echo $e->getMessage();
+        echo '<p>Couldn\'t get any scoring values, Do you have data processed?</p>';
+        echo $e->getMessage();
+        error_log("error1");
         exit();
     }
     catch ( MongoResultException $e )
     
     {
-            $message=$e->getMessage();
-            //echo '<p>Couldn\'t get any scoring values, Do you have data processed?</p>';
-            echo "<script type='text/javascript'> alert('$message');</script>";
+        $message=$e->getMessage();
+        error_log("error2");
+        //echo '<p>Couldn\'t get any scoring values, Do you have data processed?</p>';
+        echo "<script type='text/javascript'> alert('$message');</script>";
         exit();
     }
     return $best_scored_genes;
-
- 
 }
 ###viruses table request
 function find_all_viruses(MongoCollection $vi){
 	try
-   {	
+    {	
 		//$cursor=$vi->find(array(),array('type'=>1,'src'=>1,'tgt'=>1,'src_version'=>1,'tgt_version'=>1));
-		
+
 		$cursor=$vi->aggregate(array( 
 			array('$project' => 
 				array('full_name' => 1,
@@ -3410,7 +2721,7 @@ function find_all_viruses(MongoCollection $vi){
 					)
 				)
 			),
-            array('cursor' => ["batchSize" => 0])
+            array('cursor' => ["batchSize" => 50])
         );	
 	}
     catch ( MongoConnectionException $e )
