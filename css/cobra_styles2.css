@@ -458,7 +458,8 @@ table.dataTable tbody tr:hover {
     
   }
   
-/*  .container{
-    padding: 10px 10px 0px;
-  }*/
- 
+.svg-container{
+  float: left;
+  display: inline-block;
+  width: 70%
+}

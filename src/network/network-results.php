@@ -4,6 +4,13 @@ include '../functions/php_functions.php';
 include '../functions/mongo_functions.php';
 require('../session/control-session.php');
 
+//////////////////////////////////////////////////////
+// This document has the following structure:
+// 1/ collect info from mongo database
+// 2/ Write to html page js function 
+// 3/ Write description information of the entitie
+/////////////////////////////////////////////////////
+
 
 
 
@@ -13,12 +20,17 @@ $db=mongoConnector();
 $historyCollection = new Mongocollection($db, "history");
 date_default_timezone_set('Europe/Paris');
 
-if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
+////////////////////////////////////////////////////////////////////////////////////
+// 1/ collect info from mongo database
+////////////////////////////////////////////////////////////////////////////////////
+if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA') && 
+    (isset($_GET['species']) && $_GET['species']!='' && $_GET['species']!='NA') ){
 
 	// Save search to user history
     array_push($_SESSION['historic'],$_GET['search']);
     // Control input
 	$search=control_post(htmlspecialchars($_GET['search']));
+    $species=control_post(htmlspecialchars($_GET['species']));
 
     ////////////////////////////////////
     //ASSIGN ALL COLLECTIONS and GRIDS//
@@ -36,7 +48,7 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
     //SEARCH ENTRY IN FULL TABLE MAPPING WITH SAME ID//
     ///////////////////////////////////////////////////////  
     $cursor=$full_mappingsCollection->aggregate(array(
-        array('$match' => array('type'=>'full_table')),  
+        array('$match' => array('type'=>'full_table','species'=>$species)),  
         array('$project' => array('mapping_file'=>1,'_id'=>0)),
         array('$unwind'=>'$mapping_file'),
         array('$match' => array('$or'=> array(
@@ -67,7 +79,7 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
     $uniprot_id=array();
     $protein_id=array();
     $est_id=array();
-    $go_list=array();
+    $method_list=array();
     $percent_array=array();
     $score=0.0;
 
@@ -117,6 +129,15 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
                     }
                 }
             }
+            // Gene symbol
+            if (isset($result['mapping_file']['Symbol'])&& $result['mapping_file']['Symbol']!='' && $result['mapping_file']['Symbol']!='NA'){
+                $symbol_list=explode(",", $result['mapping_file']['Symbol']);
+                foreach ($symbol_list as $symbol) {
+                    if (in_array($symbol,$gene_symbol)==FALSE && $symbol!='NA'){
+                        array_push($gene_symbol,$symbol);
+                    }
+                }
+            }
             // Retrieve gene aliases
             if (isset($result['mapping_file']['Alias'])&& $result['mapping_file']['Alias']!='' && $result['mapping_file']['Alias']!='NA'){
                 if (in_array($result['mapping_file']['Alias'],$gene_alias)==FALSE){
@@ -131,7 +152,6 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
             }
             // Retrieve transcript ID
             if (isset($result['mapping_file']['Transcript ID'])&& $result['mapping_file']['Transcript ID']!='' && $result['mapping_file']['Transcript ID']!='NA'){
-                
                 $transcript_ids = preg_split("/[\s,]+/",$result['mapping_file']['Transcript ID']);
                 foreach ($transcript_ids as $id) {
                     if (in_array($id,$transcript_id)==FALSE){
@@ -139,32 +159,99 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
                     }
                 }
             } 
-        } // end foreach
-        // load_and_display_interactions_with_ajax($gene_id,$uniprot_id,$transcript_id,null, "../");
-        // echo '<i class="icon ion-md-analytics" large></i>';
-
-        $cursor_js=$pv_interactionsCollection->aggregate(array(
-            array('$match'=>array('src'=>"Uniprot ID")),
-            array('$project' => array('mapping_file'=>1,'_id'=>0)),
-            array('$unwind'=>'$mapping_file'),
-            array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$uniprot_id))),
-            array('$project' => array('mapping_file.database_identifier'=>1,'mapping_file.protein_alias_2'=>1,'mapping_file.Virus Uniprot ID'=>1,'mapping_file.pmid'=>1,'mapping_file.author_name'=>1,'mapping_file.detection_method'=>1,'mapping_file.virus'=>1,'_id'=>0))
-        ), array('cursor' => ["batchSize" => 100]));
-
-        if (count($cursor_js['cursor']['firstBatch'])>0){
-            foreach ($cursor_js['cursor']['firstBatch'] as $value) {
-                foreach ($value as $data) {
-                    echo '<p>'.$data['database_identifier'].'</p>';
+            // Description
+            if (isset($result['mapping_file']['Description'])&& $result['mapping_file']['Description']!='' && $result['mapping_file']['Description']!='NA'){
+                if (in_array($result['mapping_file']['Description'],$descriptions)==FALSE){
+                    array_push($descriptions,$result['mapping_file']['Description']);
+                }
+            } 
+            // Method
+            if (isset($result['mapping_file']['detection_method'])&& $result['mapping_file']['detection_method']!='' && $result['mapping_file']['detection_method']!='NA'){
+                if (in_array($result['mapping_file']['detection_method'],$method_list)==FALSE){
+                    array_push($method_list,$result['mapping_file']['method']);
                 }
             }
-        }else{
-            echo '<p>Not result found.</p>';
-        }
 
+        } // end foreach
+        ////////////////////////////////////////////////////////////////////////////////////
+        // 3/ Write description information of the entitie
+        ////////////////////////////////////////////////////////////////////////////////////
+        echo '
+        <div id="section_description" width="50%">
+            <div id="section_description"><br />
+                <h1>';
+                        
+                    for ($i = 0; $i < count($gene_symbol); $i++) {
+                        if ($i==count($gene_symbol)-1){
+                            $gene_name = $gene_symbol[$i];
+                            echo $gene_symbol[$i];
+                        }
+                        else{
+                            echo $gene_symbol[$i].', ';
+                            $gene_name = $gene_symbol[$i].', ';
+                        }
+                    }
+                    if (count($gene_symbol)==0){
+                        for ($i = 0; $i < count($gene_alias); $i++) {
+                            if ($gene_alias[$i]!='NA'){
+                                if ($i==count($gene_alias)-1){
+                                    echo $gene_alias[$i];
+                                    $gene_name = $gene_alias[$i];
+                                }
+                                else{
+                                    echo $gene_alias[$i].', ';
+                                    $gene_name = $gene_alias[$i].', ';
+                                }
+                            }
+                        }
+                    }
+                    echo '&nbsp;&nbsp;
+                    <a target="_blank" href="../result_search_5.php?organism='.str_replace(" ", "+", $species).'&search='.$gene_id[0].'">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </h1>';
+                if (count($descriptions)>0){
+                    echo'<div id="description"> <b>Description</b> : ';
+                    for ($i = 0; $i < count($descriptions); $i++) {
+                        
+                        if ($i==count($descriptions)-1){
+                            echo $descriptions[$i];
+                        }
+
+                        else{
+                            echo $descriptions[$i].', ';
+                        }
+                    }
+                    echo '</div>';
+                }
+                echo '<div id="specie"><b>Species</b> : <i>'.$species.'</i></div>';
+                if (count($uniprot_id)>0){
+                    if ($uniprot_id[0]!='NA'){
+                        echo'<div id="protein_aliases"> <B>Protein ids</B> : ';
+                        for ($i = 0; $i < count($uniprot_id); $i++) {
+                            if ($i==count($uniprot_id)-1){
+                                echo'<a target="_BLANK" href="http://www.uniprot.org/uniprot/'.$uniprot_id[$i].'" title="UniprotKB Swissprot and Trembl Sequences">'.$uniprot_id[$i].'</a>';
+                            }
+                            else{
+                                echo'<a target="_BLANK" href="http://www.uniprot.org/uniprot/'.$uniprot_id[$i].'" title="UniprotKB Swissprot and Trembl Sequences">'.$uniprot_id[$i].'</a>, ';
+                            }
+                        }
+                        echo '</div>';
+                    }
+                }
+                echo'<div id="aliases"><b>Aliases</b> : '; 
+                if (isset($gene_id[0])){echo $gene_id[0];}else{echo $gene_id_bis[0];};
+                echo '</div>';
+            echo '</div>
+        </div>';
+        ////////////////////////////////////////////////////////////////////////////////////
+        // 2/ Write to html page js function
+        ////////////////////////////////////////////////////////////////////////////////////
+        echo '<div id="network-data-init" gene-name="'.$gene_name.'" data-mode="PV" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'" method="'.htmlspecialchars( json_encode($method_list), ENT_QUOTES ).'" display:none></div>';
 
 		echo '',
 		'<script type="text/javascript">',
-	       'load_network("'.$search.'", "'.htmlspecialchars( json_encode($cursor_js['cursor']['firstBatch']), ENT_QUOTES).'");',
+	       'load_network("network-data-init", "../");',
 		'</script>';
 
     } // end if cursor
@@ -175,10 +262,27 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA')){
     </div>';	
 }
 
-echo '
-	<div class="svg-container">
-		<svg width="90%" height="75%" shape-rendering="geometricPrecision"></svg>
-	</div>';
+
+echo'
+<div class="svg-container">
+	<svg width="1000" height="650" style="float:left;" shape-rendering="geometricPrecision"></svg>
+</div>
+<div class="nav-network" id="accordion" style="float:left;width:400px;">
+    <button class="btn btn-primary" id="a" type="button" data-toggle="collapse" data-target="#display-info" data-parent="#accordion" aria-expanded="false" aria-controls="display-info">
+        <i class="fas fa-info-circle fa-3x"></i>
+    </button>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-query" data-parent="#accordion" aria-expanded="false" aria-controls="display-query">
+        <i class="fas fa-search fa-3x"></i>
+    </button>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-config" data-parent="#accordion" aria-expanded="false" aria-controls="display-config">
+        <i class="fas fa-cog fa-3x"></i>
+    </button>
+    <div class="collapse" id="display-info" style="float:left;width:400px;">
+        <p style="margin-top: 10px;">Click on a node to display information about it.</p>
+    </div>
+    <div class="collapse" id="display-query" style="float:left;width:400px;">Query</div>
+    <div class="collapse" id="display-config" style="float:left;width:400px;">Config</div>
+</div>';
 
 new_cobra_footer();
 

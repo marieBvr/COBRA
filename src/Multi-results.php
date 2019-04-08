@@ -74,43 +74,6 @@ if (((isset($_GET['organism'])) && ($_GET['organism']!='')) && ((isset($_GET['se
     $plaza_ids=array();
     $est_id=array();
     $go_duo_list=array();
-    //echo '<hr>';
-    
-    //$timestart=microtime(true);
-    //get_everything using full table mapping
-    
-    //$cursor = find_gene_by_regex($measurementsCollection,new MongoRegex("/^$search/m"));
-    
-    //$searchQuery = array('gene'=>array('$regex'=> new MongoRegex("/^$search/xi")));
-	//$cursor = $measurementsCollection->find($searchQuery);
-    //var_dump($cursor);
-    
-//    $timestart1=microtime(true);
-//    $cursor_score=$full_mappingsCollection->aggregate(array(
-//    array('$match' => array('type'=>'full_table')),  
-//    array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-//    array('$unwind'=>'$mapping_file'),
-//    array('$match' => array('mapping_file.Gene ID'=>$search)),
-//    array(
-//        '$group'=>array(
-//           '_id'=> array( 'gene'=> '$mapping_file.Gene ID' ),
-//           'scores'=> array('$addToSet'=> '$mapping_file.Score' )
-//        )
-//    )
-//   
-//    ));
-//    foreach ($cursor_score['result'] as $value) {
-//        foreach ($value['scores'] as $tmp_score) {    
-//            $score+=$tmp_score;    
-//        }  
-//    } 
-//     $timeend1=microtime(true);
-//    $time1=$timeend1-$timestart1;
-//    //Afficher le temps d'éxecution
-//    $page_load_time1 = number_format($time1, 3);
-//    echo "Debut du script: ".date("H:i:s", $timestart1);
-//    echo "<br>Fin du script: ".date("H:i:s", $timeend1);
-//    echo "<br>Script for search score executed in " . $page_load_time1 . " sec";
     
     
     $ts=start_time_capture();

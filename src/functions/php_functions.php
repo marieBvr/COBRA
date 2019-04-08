@@ -3228,8 +3228,12 @@ function load_and_display_interactions_with_ajax($gene_id,$uniprot_id,$transcrip
                         <div class="panel-heading" onclick="load_pv_interaction(this,\''.$path.'\')" data-mode="PV" data-protein="'.htmlspecialchars( json_encode($uniprot_id), ENT_QUOTES ).'" data-transcript="'.htmlspecialchars( json_encode($transcript_id), ENT_QUOTES ).'"  data-species="'.$species.'"  data-id="'.$gene_id[0].'" data-gene="'.htmlspecialchars( json_encode($gene_id), ENT_QUOTES ).'">
 
                                 <a class="accordion-toggle collapsed" href="#pv-table_'.$gene_id[0].'" data-parent="#accordion_documents_pv_'.$gene_id[0].'" data-toggle="collapse">
-                                        <strong>Plant Virus Interaction</strong>
-                                </a>				
+                                    <strong>Plant Virus Interaction</strong>
+                                </a>	
+                                &nbsp;&nbsp;		
+                                <a target="_blank" href="./network/network-results.php?species='.str_replace(" ", "+", $species).'&search='.$gene_id[0].'">
+                                    <i class="fas fa-code-branch" icon-3x></i>
+                                </a>
 
                         </div>
                         <center>
@@ -3488,6 +3492,7 @@ function display_multi_results_table(array $cursor){
         $table_string.='<thead><tr>';
             $table_string.='<th>id</th>';
             $table_string.='<th>Protein description</th>';
+            $table_string.='<th>Network</th>';
             $table_string.='<th>Alias</th>';
             $table_string.='<th>species</th>';
             $table_string.='<th>Score</th>';
@@ -3509,17 +3514,26 @@ function display_multi_results_table(array $cursor){
                         $current_id=$result['mapping_file']['Gene ID'];
 
                         $table_string.='<tr>';
+                        // name
                         if (isset($result['mapping_file']['Gene ID']) && $result['mapping_file']['Gene ID']!="NA"){ 
                             array_push($gene_id,$result['mapping_file']['Gene ID']);
-                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $result['species']).'&search='.$result['mapping_file']['Gene ID'].'">'.$result['mapping_file']['Gene ID'].'</a></td>';
+                            $species = $result['species'];
+                            $search = $result['mapping_file']['Gene ID'];
+                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $species).'&search='.$search.'">'.$search.'</a></td>';
 
                         }
                         else{
                             array_push($gene_id,$result['mapping_file']['Gene ID 2']);
-                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $result['species']).'&search='.$result['mapping_file']['Gene ID 2'].'">'.$result['mapping_file']['Gene ID 2'].'</a></td>';
+                            $species = $result['species'];
+                            $search = $result['mapping_file']['Gene ID 2'];
+                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $result['species']).'&search='.$search.'">'.$search.'</a></td>';
 
                         }
+                        // descirption 
                         $table_string.='<td>'.$result['mapping_file']['Description'].'</td>';
+                        // network
+                        $table_string.='<td><a target="_blank" href="./network/network-results.php?species='.str_replace(" ", "+", $species).'&search='.$search.'"><i class="fas fa-code-branch" icon-3x></i></a></td>';
+                        // alias
                         if (isset($result['mapping_file']['Alias']) && $result['mapping_file']['Alias']!="NA"){
                             $table_string.='<td>'.$result['mapping_file']['Alias'].'</td>';
                         }
@@ -3533,7 +3547,7 @@ function display_multi_results_table(array $cursor){
                             }
 
                         }
-
+                        // specie
                         $table_string.='<td>'.$result['species'].'</td>';
                         //$score+=intval($result['mapping_file']['Score']);
                         $score+=(float)$result['mapping_file']['Score_exp'];
@@ -3557,11 +3571,16 @@ function display_multi_results_table(array $cursor){
                             $score=0.0;
                             $previous_id=$result['mapping_file']['Gene ID'];
                             $current_id=$result['mapping_file']['Gene ID'];
+                            $species = $result['species'];
+                            $search = $result['mapping_file']['Gene ID'];
 
                             $table_string.='<tr>';
                             array_push($gene_id, $result['mapping_file']['Gene ID']);
-                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $result['species']).'&search='.$result['mapping_file']['Gene ID'].'">'.$result['mapping_file']['Gene ID'].'</a></td>';
+                            $table_string.='<td><a target="_blank" href="./result_search_5.php?organism='.str_replace(" ", "+", $species).'&search='.$search.'">'.$result['mapping_file']['Gene ID'].'</a></td>';
+                            // description
                             $table_string.='<td>'.$result['mapping_file']['Description'].'</td>';
+                            // network
+                            $table_string.='<td><a target="_blank" href="./network/network-results.php?species='.str_replace(" ", "+", $species).'&search='.$search.'"><i class="fas fa-code-branch" icon-3x></i></a></td>';
                             if (isset($result['mapping_file']['Alias']) && $result['mapping_file']['Alias']!="NA"){
                                 $table_string.='<td>'.$result['mapping_file']['Alias'].'</td>';
                             }
@@ -3575,7 +3594,6 @@ function display_multi_results_table(array $cursor){
                                 }
 
                             }
-
                             $table_string.='<td>'.$result['species'].'</td>';
                             $score+=(float)$result['mapping_file']['Score_exp'];
                             $score+=(float)$result['mapping_file']['Score_int']; 
@@ -3636,7 +3654,7 @@ function make_network_list($path='null'){
                         </div>
                         <div class="ff-notes">
                             <p class="search-example " style="padding : 6px">e.g. 
-                                <a class="nowrap" target="_blank" href="'.$path.'/src/network/network-results.php?organism=Arabidopsis+thaliana&search=AT1G05760">AT1G05760</a> 
+                                <a class="nowrap" target="_blank" href="'.$path.'/src/network/network-results.php?species=Arabidopsis+thaliana&search=AT1G06680">AT1G06680</a> 
                                 or 
                                 <a class="nowrap" target="_blank" href="'.$path.'/src/result_search_5.php?organism=Arabidopsis+thaliana&search=ATCG01100">TODO</a>
                                 or

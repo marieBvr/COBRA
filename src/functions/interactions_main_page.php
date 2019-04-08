@@ -42,3 +42,4 @@ if (isset($_POST['gene_ids'],$_POST['transcript_ids'],$_POST['protein_ids'],$_PO
     }
 }
 new_cobra_footer();	
+?>

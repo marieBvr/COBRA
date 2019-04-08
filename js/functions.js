@@ -1658,8 +1658,76 @@ $(document).ready(function() {
 	});
 });
 
-function load_network(gene_id, result){
-    console.log(gene_id, result);
+function load_network(element, path){
+    species=document.getElementById(element).getAttribute('data-species');
+    gene_id=document.getElementById(element).getAttribute('data-id');
+    gene_ids=document.getElementById(element).getAttribute('data-gene');
+    transcript_ids=document.getElementById(element).getAttribute('data-transcript');
+    protein_ids=document.getElementById(element).getAttribute('data-protein');
+    mode=document.getElementById(element).getAttribute('data-mode');
+    gene_name=document.getElementById(element).getAttribute('gene-name');
+
+    $.ajax({
+        url : path + 'functions/interactions_network.php', // La ressource ciblée
+        type : 'POST' ,// Le type de la requête HTTP.
+        data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +'&species=' + species+'&mode=' + mode,
+        method: 'post',
+        cache: false,
+        async: true,
+        dataType: "html",
+
+        success: function (data) {
+            var result = JSON.parse(data);
+            var nodes = [];
+            var links = [];
+            console.log(result);
+            if (result != "No result found."){
+                var items = result;
+                nodes.push({
+                    "id": gene_id,
+                    "name": gene_name,
+                    "alias": gene_id,
+                    "species": species,
+                    "search": true,
+                    "x": Math.floor(Math.random() * 650) + 300,
+                    "y": Math.floor(Math.random() * 300) + 100,
+                    "vx": Math.floor(Math.random() * 1) + 0,
+                    "vy": Math.floor(Math.random() * 3) + 1
+                });
+                for (item in items){
+                    if ("Virus Uniprot ID" in items[item]["mapping_file"]) {
+                        id = items[item]["mapping_file"]["Virus Uniprot ID"];
+                    }else{
+                        id = items[item]["mapping_file"]["Virus_symbol"];
+                    }
+                    nodes.push({
+                        "Uniprot ID": items[item]["mapping_file"]["Uniprot ID"],
+                        "Virus Uniprot ID": items[item]["mapping_file"]["Virus Uniprot ID"],
+                        "Virus_symbol": items[item]["mapping_file"]["Virus_symbol"],
+                        "database_identifier": items[item]["mapping_file"]["database_identifier"],
+                        "author_name": ("author_name" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["author_name"] : items[item]["mapping_file"]["Reference"] ,
+                        "pmid": items[item]["mapping_file"]["pmid"],
+                        "protein_alias_2": items[item]["mapping_file"]["protein_alias_2"],
+                        "virus": items[item]["mapping_file"]["virus"],
+                        "id": id,
+                        "species": items[item]["mapping_file"]["species"],
+                        "method": ("detection_method" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["detection_method"] : items[item]["mapping_file"]["method"],
+                        "search": false,
+                        "x": Math.floor(Math.random() * 650) + 300,
+                        "y": Math.floor(Math.random() * 300) + 100,
+                        "vx": Math.floor(Math.random()),
+                        "vy": Math.floor(Math.random() * (3 - 1) + 1)
+                    });
+                    var dict = {
+                      "Source": id,
+                      "Target": gene_id,
+                    };
+                    links.push(dict);
+                }
+                draw_network(nodes, links);
+            }else{
+                $(".svg-container").empty().append("<p>" + result + "</p>");
+            }
+        }
+    });
 }
-
-

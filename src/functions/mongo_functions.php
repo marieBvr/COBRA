@@ -183,19 +183,6 @@ function get_ortholog_list_2(Mongocollection $ma,Mongocollection $me,Mongocollec
         $gene_name=split('[.]', $value['gene']);
         //echo $gene_name[0];
         $value['gene']=$gene_name[0];
-        //echo 'gene to found : '.$value['gene'].'</br>';
-        //$timestart=microtime(true);
-        
-        
-        
-        
-//        $cursor2=$ma->aggregate(array(
-//        array('$match' => array('type'=>'full_table')),  
-//        //array('$match' => array('$and'=>array(array('type'=>'full_table'),array('species'=>$species)))),  
-//        array('$project' => array('mapping_file'=>1,'species'=>1,'_id'=>0)),
-//        array('$unwind'=>'$mapping_file'),
-//        array('$match' => array('$or'=> array(array('mapping_file.Plaza ID'=>$value['gene']),array('mapping_file.Uniprot ID'=>$value['gene']),array('mapping_file.Protein ID 2'=>$value['gene']),array('mapping_file.Protein ID'=>$value['gene']),array('mapping_file.Alias'=>$value['gene']),array('mapping_file.Probe ID'=>$value['gene']),array('mapping_file.Gene ID'=>$value['gene']),array('mapping_file.Gene ID 2'=>$value['gene'])))),
-//        array('$project' => array("mapping_file"=>1,'species'=>1,'_id'=>0))));
         
         
         $cursor2=$ma->find(array('mapping_file.Protein ID'=>$value['gene']),array('mapping_file.$'=>1,'_id'=>0));
@@ -206,24 +193,6 @@ function get_ortholog_list_2(Mongocollection $ma,Mongocollection $me,Mongocollec
 
                 }
         }
-        
-//        $timeend=microtime(true);
-//        $time=$timeend-$timestart;
-//        //Afficher le temps d'éxecution
-//        $page_load_time = number_format($time, 3);
-//        echo "Script starting at: ".date("H:i:s", $timestart);
-//        echo "<br>Script ending at:".date("H:i:s", $timeend);
-//        echo "<br>Script aggregate  executed in " . $page_load_time . " sec";
-
-//        
-//        foreach ($cursor2['result'] as $result) {
-//            //echo 'result plaza id:'.$result['mapping_file']['Plaza ID'];
-//            $plaza_id=$result['mapping_file']['Plaza ID'];
-//            array_push($gene_list,array('plaza_id'=>$plaza_id,'search'=>$value['gene'],'logFC'=>$value['logFC'],'infection_agent'=>$value['infection_agent']));
-//
-//            
-//            
-//        }
     }
     
     return $gene_list;
@@ -549,25 +518,39 @@ function get_global_score($full_mappingsCollection,$search='null',$species='null
 function get_hpidb_plant_virus_interactor(array $protein_id, MongoCollection $pvinteractionsCollection,$species='null'){
 
 
+    // $cursor=$pvinteractionsCollection->aggregate(array(
+    //         array('$match'=>array('src'=>"Uniprot ID")),
+    //         array('$project' => array('mapping_file'=>1,'_id'=>0)),
+    //         array('$unwind'=>'$mapping_file'),
+    //         array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$protein_id))),
+    //         array('$project' => array('mapping_file.database_identifier'=>1,'mapping_file.protein_alias_2'=>1,'mapping_file.Virus Uniprot ID'=>1,'mapping_file.pmid'=>1,'mapping_file.author_name'=>1,'mapping_file.detection_method'=>1, 'mapping_file.virus'=>1,'_id'=>0))
+    //     ), array('cursor' => ["batchSize" => 20]));  
     $cursor=$pvinteractionsCollection->aggregate(array(
-            array('$match'=>array('src'=>"Uniprot ID")),
-            array('$project' => array('mapping_file'=>1,'_id'=>0)),
-            array('$unwind'=>'$mapping_file'),
-            array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$protein_id))),
-            array('$project' => array('mapping_file.database_identifier'=>1,'mapping_file.protein_alias_2'=>1,'mapping_file.Virus Uniprot ID'=>1,'mapping_file.pmid'=>1,'mapping_file.author_name'=>1,'mapping_file.detection_method'=>1,'mapping_file.virus'=>1,'_id'=>0))
-        ), array('cursor' => ["batchSize" => 20]));  
+        array('$match'=>array('src'=>"Uniprot ID")),
+        array('$project' => array('mapping_file'=>1,'_id'=>0)),
+        array('$unwind'=>'$mapping_file'),
+        array('$match' => array('mapping_file.Uniprot ID'=>array('$in'=>$protein_id))),
+        array('$project' => array("mapping_file"=>1,'_id'=>0))
+    ), array('cursor' => ["batchSize" => 20]));  
     return $cursor;    
  
 }
 function get_litterature_plant_virus_interactor(array $gene_id, MongoCollection $pvinteractionsCollection,$species='null'){
 
+    // $cursor=$pvinteractionsCollection->aggregate(array(
+    //         array('$match'=>array('src'=>"Gene ID")),#,'species'=>$species)),
+    //         array('$project' => array('mapping_file'=>1,'_id'=>0)),
+    //         array('$unwind'=>'$mapping_file'),
+    //         array('$match' => array('mapping_file.Gene ID'=>array('$in'=>$gene_id))),
+    //         array('$project' => array('mapping_file.Virus_symbol'=>1,'mapping_file.virus'=>1,'mapping_file.method'=>1,'mapping_file.Reference'=>1,'mapping_file.species'=>1,'_id'=>0))
+    //     ), array('cursor' => ["batchSize" => 30]));
     $cursor=$pvinteractionsCollection->aggregate(array(
-            array('$match'=>array('src'=>"Gene ID")),#,'species'=>$species)),
-            array('$project' => array('mapping_file'=>1,'_id'=>0)),
-            array('$unwind'=>'$mapping_file'),
-            array('$match' => array('mapping_file.Gene ID'=>array('$in'=>$gene_id))),
-            array('$project' => array('mapping_file.Virus_symbol'=>1,'mapping_file.virus'=>1,'mapping_file.method'=>1,'mapping_file.Reference'=>1,'mapping_file.species'=>1,'_id'=>0))
-        ), array('cursor' => ["batchSize" => 20]));
+        array('$match'=>array('src'=>"Gene ID")),#,'species'=>$species)),
+        array('$project' => array('mapping_file'=>1,'_id'=>0)),
+        array('$unwind'=>'$mapping_file'),
+        array('$match' => array('mapping_file.Gene ID'=>array('$in'=>$gene_id))),
+        array('$project' => array("mapping_file"=>1,'_id'=>0))
+    ), array('cursor' => ["batchSize" => 30]));
 
 
     return $cursor;    

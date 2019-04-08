@@ -30,10 +30,14 @@ function new_cobra_header($path='null'){
     <link rel="stylesheet" type="text/css" href="'.$path.'/js/DataTables-1.10.12/css/dataTables.bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="'.$path.'/js/Buttons-1.2.1/css/buttons.bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="'.$path.'/css/cobra_styles2.css"/>	
+    <link rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
         
    <!-- <link rel="stylesheet" type="text/css" href="'.$path.'/js/Responsive-2.1.0/css/responsive.bootstrap.min.css"/>
     <script type="text/javascript" src="'.$path.'/js/Responsive-2.1.0/js/dataTables.responsive.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Responsive-2.1.0/js/responsive.bootstrap.min.js"></script>-->
+    
     <script type="text/javascript" src="'.$path.'/js/jQuery-2.2.3/jquery-2.2.3.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/JSZip-2.5.0/jszip.min.js"></script>
@@ -47,11 +51,11 @@ function new_cobra_header($path='null'){
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.flash.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.print.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="'.$path.'/js/network.js"></script>
     <script type="text/javascript" src="'.$path.'/js/functions.js"></script>
     <script type="text/javascript" src="'.$path.'/js/require.min.js"></script>
         
-
-
     <script type="text/javascript" src="'.$path.'/css/Highcharts-4.1.8/js/highcharts.js"></script>
     <script type="text/javascript" src="'.$path.'/css/Highcharts-4.1.8/js/highcharts-more.js" ></script>
     <script type="text/javascript" src="'.$path.'/css/Highcharts-4.1.8/js/modules/funnel.js"></script>
