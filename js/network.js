@@ -97,16 +97,22 @@ function draw_network(nodes, links){
             '<div><b>Source: </b>' + edge.source + '</div>' +
             '<div><b>Target: </b>' + edge.target + '</div>' +
             '<div><b>Method: </b>' + edge.method + '</div>' +
-            '<div><b>Reference: </b>' + edge.author_name + '</div>' +
+            '<div><b>Reference: </b><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + edge.pmid + '">' + edge.author_name + '</a></div>' +
          '</div>' +
       '</div>';
     });
 
-
+    // Check so add nodes
     $('#pp_check').on('ifChecked', function(event){
         path=document.getElementById('pp_check').getAttribute('data-path');
         element=document.getElementById('pp_check').getAttribute('data-element');
-        add_pp_interactions(cy, path, element)
+        add_pp_interactions(cy, path, element);
+    });
+
+    // Uncheck so remove nodes
+    $('#pp_check').on('ifUnchecked', function(event){
+        var collec = cy.$('.class-node-pp');
+        cy.remove(collec);
     });
 
 }

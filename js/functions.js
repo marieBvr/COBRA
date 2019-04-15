@@ -1690,11 +1690,7 @@ function load_network(element, path){
                         "name": gene_name,
                         "alias": gene_id,
                         "species": species,
-                        "search": true,
-                        "x": Math.floor(Math.random() * 650) + 300,
-                        "y": Math.floor(Math.random() * 300) + 100,
-                        "vx": Math.floor(Math.random() * 1) + 0,
-                        "vy": Math.floor(Math.random() * 3) + 1
+                        "search": true
                     }
                 });
                 for (item in items){
@@ -1715,10 +1711,7 @@ function load_network(element, path){
                             "id": id,
                             "species": items[item]["mapping_file"]["species"],
                             "search": false,
-                            "x": Math.floor(Math.random() * 650) + 300,
-                            "y": Math.floor(Math.random() * 300) + 100,
-                            "vx": Math.floor(Math.random()),
-                            "vy": Math.floor(Math.random() * (3 - 1) + 1)
+                            "pmid": items[item]["mapping_file"]["pmid"]
                         }
                     });
                     var dict = {
@@ -1727,7 +1720,8 @@ function load_network(element, path){
                             "target": gene_id,
                             "id": id + "_" + gene_id,
                             "method": ("detection_method" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["detection_method"] : items[item]["mapping_file"]["method"],
-                            "author_name": ("author_name" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["author_name"] : items[item]["mapping_file"]["Reference"]
+                            "author_name": ("author_name" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["author_name"] : items[item]["mapping_file"]["Reference"],
+                            "pmid": items[item]["mapping_file"]["pmid"]
                         }
                     };
                     links.push(dict);
@@ -1793,35 +1787,41 @@ function add_pp_interactions(cy, path, element){
                 var items = result;
                 for (item in items){
                     nodes.push({
-                     data: {
-                        "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
-                        "gene_id": items[item]["mapping_file"]["Gene ID 2"],
-                        "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
-                        "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
-                        "pmid": items[item]["mapping_file"]["PUBMED_ID"],
-                        "search": false,
-                        "x": Math.floor(Math.random() * 650) + 300,
-                        "y": Math.floor(Math.random() * 300) + 100,
-                        "vx": Math.floor(Math.random()),
-                        "vy": Math.floor(Math.random() * (3 - 1) + 1)
-                     }
+                        data: {
+                            "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
+                            "gene_id": items[item]["mapping_file"]["Gene ID 2"],
+                            "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                            "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
+                            "pmid": items[item]["mapping_file"]["PUBMED_ID"],
+                            "search": false,
+                            "type": "PP"
+                        }
                     });
                     var dict = {
                         data: {
-                        "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
-                        "target": gene_id,
-                        "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
-                        "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
-                        "author_name": items[item]["mapping_file"]["SOURCE"]
+                            "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                            "target": gene_id,
+                            "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
+                            "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
+                            "author_name": items[item]["mapping_file"]["SOURCE"],
+                            "pmid": items[item]["mapping_file"]["pmid"]
                         }
                     };
                     links.push(dict);
                 }
+                // Add nodes to network
                 cy.add({
                   nodes: nodes,
                   edges: links
                 });
+                // Run simulation
                 cy.layout(config_layout).run();
+                // Add specific class to the plant-plant node
+                cy.filter(function(element, i){
+                    if( element.isNode() && element.data("type") === "PP" ){
+                        element.addClass('class-node-pp');
+                    } 
+                }); 
             } // end if
         }
     });
