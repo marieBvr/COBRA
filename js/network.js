@@ -89,17 +89,27 @@ function draw_network(nodes, links){
     });
     // Display edge informations
     cy.on('click', 'edge', function(event) {
-      var edge = this[0]["_private"]["data"];
-      document.getElementById("display-info").innerHTML = '<br />' +
-      '<div class="panel panel-default">' +
+        var edge = this[0]["_private"]["data"];
+        var ref = [];
+        // Multiple ref
+        if (Array.isArray(edge.pmid)) {
+            for (r in edge.pmid){
+                ref.push('<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + edge.pmid[r] + '">' + edge.author_name[r] + '</a>');
+            }
+        }else{
+            ref = '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + edge.pmid + '">' + edge.author_name + '</a>';
+        }
+
+        document.getElementById("display-info").innerHTML = '<br />' +
+        '<div class="panel panel-default">' +
          '<div class="panel-heading">Description</div>' +
          '<div class="panel-body">' +
             '<div><b>Source: </b>' + edge.source + '</div>' +
             '<div><b>Target: </b>' + edge.target + '</div>' +
             '<div><b>Method: </b>' + edge.method + '</div>' +
-            '<div><b>Reference: </b><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + edge.pmid + '">' + edge.author_name + '</a></div>' +
+            '<div><b>Reference: </b>' + ref + '</div>' +
          '</div>' +
-      '</div>';
+        '</div>';
     });
 
     // Check so add nodes

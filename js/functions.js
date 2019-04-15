@@ -1782,32 +1782,60 @@ function add_pp_interactions(cy, path, element){
             var result = JSON.parse(data);
             var nodes = [];
             var links = [];
+            var nodes_init_id = [];
             console.log(result);
+
+            cy.nodes().forEach(node => {
+                nodes_init_id.push(node.id());
+            });
+
             if (result != "No result found."){
                 var items = result;
+                var current_nodes = [];
                 for (item in items){
-                    nodes.push({
-                        data: {
-                            "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
-                            "gene_id": items[item]["mapping_file"]["Gene ID 2"],
-                            "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
-                            "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
-                            "pmid": items[item]["mapping_file"]["PUBMED_ID"],
-                            "search": false,
-                            "type": "PP"
+                    var id = items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"];
+
+                    // -1 == not found
+                    if (nodes_init_id.indexOf(id) != -1) { // found in nodes_init
+                        var n = nodes.filter(obj => {
+                            if (obj.id == id){
+                                return(obj)
+                            }
+                        });
+                    }else{ // not found
+                        if (current_nodes.indexOf(id) != -1){ // found in current_codes
+                            var n = links.filter(obj => {
+                                if (obj.data.source == id){
+                                    obj.data.method = [obj.data.method, items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"]];
+                                    obj.data.author_name = [obj.data.author_name, items[item]["mapping_file"]["SOURCE"]];
+                                    obj.data.pmid = [obj.data.pmid, items[item]["mapping_file"]["PUBMED_ID"]]
+                                }
+                            });
+                        }else{ // not found
+                            nodes.push({
+                                data: {
+                                    "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
+                                    "gene_id": items[item]["mapping_file"]["Gene ID 2"],
+                                    "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                                    "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
+                                    "search": false,
+                                    "type": "PP"
+                                }
+                            });
+                            var dict = {
+                                data: {
+                                    "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                                    "target": gene_id,
+                                    "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
+                                    "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
+                                    "author_name": items[item]["mapping_file"]["SOURCE"],
+                                    "pmid": items[item]["mapping_file"]["PUBMED_ID"]
+                                }
+                            };
+                            links.push(dict);
+                            current_nodes.push(id);
                         }
-                    });
-                    var dict = {
-                        data: {
-                            "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
-                            "target": gene_id,
-                            "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
-                            "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
-                            "author_name": items[item]["mapping_file"]["SOURCE"],
-                            "pmid": items[item]["mapping_file"]["pmid"]
-                        }
-                    };
-                    links.push(dict);
+                    }
                 }
                 // Add nodes to network
                 cy.add({
