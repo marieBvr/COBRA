@@ -254,6 +254,9 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA') &&
 	       'load_network("network-data-init", "../");',
 		'</script>';
 
+        // in  html_functions.php
+        display_cy_panel("network-data-init", "../");
+
     } // end if cursor
 }else{
     echo'
@@ -262,27 +265,6 @@ if ((isset($_GET['search']) && $_GET['search']!='' && $_GET['search']!='NA') &&
     </div>';	
 }
 
-
-echo'
-<div class="svg-container">
-	<svg width="1000" height="650" style="float:left;" shape-rendering="geometricPrecision"></svg>
-</div>
-<div class="nav-network" id="accordion" style="float:left;width:400px;">
-    <button class="btn btn-primary" id="a" type="button" data-toggle="collapse" data-target="#display-info" data-parent="#accordion" aria-expanded="false" aria-controls="display-info">
-        <i class="fas fa-info-circle fa-3x"></i>
-    </button>
-    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-query" data-parent="#accordion" aria-expanded="false" aria-controls="display-query">
-        <i class="fas fa-search fa-3x"></i>
-    </button>
-    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-config" data-parent="#accordion" aria-expanded="false" aria-controls="display-config">
-        <i class="fas fa-cog fa-3x"></i>
-    </button>
-    <div class="collapse" id="display-info" style="float:left;width:400px;">
-        <p style="margin-top: 10px;">Click on a node to display information about it.</p>
-    </div>
-    <div class="collapse" id="display-query" style="float:left;width:400px;">Query</div>
-    <div class="collapse" id="display-config" style="float:left;width:400px;">Config</div>
-</div>';
 
 new_cobra_footer();
 

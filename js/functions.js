@@ -833,7 +833,7 @@ function load_pp_interaction(element, path){
     if (pp_already_open==="true"){
        //alert("already open");
        //open="false";
-   }
+    }
     else{
         $.ajax({
 
@@ -1670,7 +1670,8 @@ function load_network(element, path){
     $.ajax({
         url : path + 'functions/interactions_network.php', // La ressource ciblée
         type : 'POST' ,// Le type de la requête HTTP.
-        data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +'&species=' + species+'&mode=' + mode,
+        data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +
+               '&species=' + species+'&mode=' + mode + '&type=' + "PV",
         method: 'post',
         cache: false,
         async: true,
@@ -1684,15 +1685,17 @@ function load_network(element, path){
             if (result != "No result found."){
                 var items = result;
                 nodes.push({
-                    "id": gene_id,
-                    "name": gene_name,
-                    "alias": gene_id,
-                    "species": species,
-                    "search": true,
-                    "x": Math.floor(Math.random() * 650) + 300,
-                    "y": Math.floor(Math.random() * 300) + 100,
-                    "vx": Math.floor(Math.random() * 1) + 0,
-                    "vy": Math.floor(Math.random() * 3) + 1
+                    data: {
+                        "id": gene_id,
+                        "name": gene_name,
+                        "alias": gene_id,
+                        "species": species,
+                        "search": true,
+                        "x": Math.floor(Math.random() * 650) + 300,
+                        "y": Math.floor(Math.random() * 300) + 100,
+                        "vx": Math.floor(Math.random() * 1) + 0,
+                        "vy": Math.floor(Math.random() * 3) + 1
+                    }
                 });
                 for (item in items){
                     if ("Virus Uniprot ID" in items[item]["mapping_file"]) {
@@ -1701,26 +1704,31 @@ function load_network(element, path){
                         id = items[item]["mapping_file"]["Virus_symbol"];
                     }
                     nodes.push({
-                        "Uniprot ID": items[item]["mapping_file"]["Uniprot ID"],
-                        "Virus Uniprot ID": items[item]["mapping_file"]["Virus Uniprot ID"],
-                        "Virus_symbol": items[item]["mapping_file"]["Virus_symbol"],
-                        "database_identifier": items[item]["mapping_file"]["database_identifier"],
-                        "author_name": ("author_name" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["author_name"] : items[item]["mapping_file"]["Reference"] ,
-                        "pmid": items[item]["mapping_file"]["pmid"],
-                        "protein_alias_2": items[item]["mapping_file"]["protein_alias_2"],
-                        "virus": items[item]["mapping_file"]["virus"],
-                        "id": id,
-                        "species": items[item]["mapping_file"]["species"],
-                        "method": ("detection_method" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["detection_method"] : items[item]["mapping_file"]["method"],
-                        "search": false,
-                        "x": Math.floor(Math.random() * 650) + 300,
-                        "y": Math.floor(Math.random() * 300) + 100,
-                        "vx": Math.floor(Math.random()),
-                        "vy": Math.floor(Math.random() * (3 - 1) + 1)
+                        data: {
+                            "uniprot ID": items[item]["mapping_file"]["Uniprot ID"],
+                            "virus Uniprot ID": items[item]["mapping_file"]["Virus Uniprot ID"],
+                            "virus_symbol": items[item]["mapping_file"]["Virus_symbol"],
+                            "database_identifier": items[item]["mapping_file"]["database_identifier"],
+                            "pmid": items[item]["mapping_file"]["pmid"],
+                            "protein_alias_2": items[item]["mapping_file"]["protein_alias_2"],
+                            "virus": items[item]["mapping_file"]["virus"],
+                            "id": id,
+                            "species": items[item]["mapping_file"]["species"],
+                            "search": false,
+                            "x": Math.floor(Math.random() * 650) + 300,
+                            "y": Math.floor(Math.random() * 300) + 100,
+                            "vx": Math.floor(Math.random()),
+                            "vy": Math.floor(Math.random() * (3 - 1) + 1)
+                        }
                     });
                     var dict = {
-                      "Source": id,
-                      "Target": gene_id,
+                        data: {
+                            "source": id,
+                            "target": gene_id,
+                            "id": id + "_" + gene_id,
+                            "method": ("detection_method" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["detection_method"] : items[item]["mapping_file"]["method"],
+                            "author_name": ("author_name" in items[item]["mapping_file"]) ? items[item]["mapping_file"]["author_name"] : items[item]["mapping_file"]["Reference"]
+                        }
                     };
                     links.push(dict);
                 }
@@ -1728,6 +1736,93 @@ function load_network(element, path){
             }else{
                 $(".svg-container").empty().append("<p>" + result + "</p>");
             }
+        }
+    });
+}
+
+///////////////////////////////////////////
+/// Navigation panel of network (right side)
+///////////////////////////////////////////
+$(document).ready( function() {
+    $('#display-info').collapse({ 'toggle': true }).collapse('show');
+    // display info
+    $('#display-info').on('show.bs.collapse', function () {
+        $('#display-query').collapse({ 'toggle': false }).collapse('hide');
+        $('#display-config').collapse({ 'toggle': false }).collapse('hide');
+    });
+    // display query
+    $('#display-query').on('show.bs.collapse', function () {
+        $('#display-info').collapse({ 'toggle': false }).collapse('hide');
+        $('#display-config').collapse({ 'toggle': false }).collapse('hide');
+    });
+    // display config
+    $('#display-config').on('show.bs.collapse', function () {
+        $('#display-query').collapse({ 'toggle': false }).collapse('hide');
+        $('#display-info').collapse({ 'toggle': false }).collapse('hide');
+    });
+});
+
+//////////////////////////////////////////
+/// Network Panel Settings API
+//////////////////////////////////////////
+function add_pp_interactions(cy, path, element){
+    species=document.getElementById(element).getAttribute('data-species');
+    gene_id=document.getElementById(element).getAttribute('data-id');
+    gene_ids=document.getElementById(element).getAttribute('data-gene');
+    transcript_ids=document.getElementById(element).getAttribute('data-transcript');
+    protein_ids=document.getElementById(element).getAttribute('data-protein');
+    mode=document.getElementById(element).getAttribute('data-mode');
+    gene_name=document.getElementById(element).getAttribute('gene-name');
+
+    $.ajax({
+        url : path + 'functions/interactions_network.php', // La ressource ciblée
+        type : 'POST' ,// Le type de la requête HTTP.
+        data : 'gene_ids=' + gene_ids + '&transcript_ids=' + transcript_ids +'&protein_ids=' + protein_ids +
+        '&species=' + species+'&mode=' + mode + '&type=' + "PP",
+        method: 'post',
+        cache: false,
+        async: true,
+        dataType: "html",
+
+        success: function (data) {
+            var result = JSON.parse(data);
+            var nodes = [];
+            var links = [];
+            console.log(result);
+            if (result != "No result found."){
+                var items = result;
+                for (item in items){
+                    nodes.push({
+                     data: {
+                        "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
+                        "gene_id": items[item]["mapping_file"]["Gene ID 2"],
+                        "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                        "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
+                        "pmid": items[item]["mapping_file"]["PUBMED_ID"],
+                        "search": false,
+                        "x": Math.floor(Math.random() * 650) + 300,
+                        "y": Math.floor(Math.random() * 300) + 100,
+                        "vx": Math.floor(Math.random()),
+                        "vy": Math.floor(Math.random() * (3 - 1) + 1)
+                     }
+                    });
+                    var dict = {
+                        data: {
+                        "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                        "target": gene_id,
+                        "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
+                        "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
+                        "author_name": items[item]["mapping_file"]["SOURCE"]
+                        }
+                    };
+                    links.push(dict);
+                }
+                cy.add({
+                  nodes: nodes,
+                  edges: links
+                });
+                cy.layout(config_layout).run();
+            } // end if
         }
     });
 }

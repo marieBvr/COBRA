@@ -37,7 +37,7 @@ function new_cobra_header($path='null'){
    <!-- <link rel="stylesheet" type="text/css" href="'.$path.'/js/Responsive-2.1.0/css/responsive.bootstrap.min.css"/>
     <script type="text/javascript" src="'.$path.'/js/Responsive-2.1.0/js/dataTables.responsive.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Responsive-2.1.0/js/responsive.bootstrap.min.js"></script>-->
-    
+
     <script type="text/javascript" src="'.$path.'/js/jQuery-2.2.3/jquery-2.2.3.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/JSZip-2.5.0/jszip.min.js"></script>
@@ -51,7 +51,8 @@ function new_cobra_header($path='null'){
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.flash.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/Buttons-1.2.1/js/buttons.print.min.js"></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <!--script src="https://d3js.org/d3.v5.min.js"></script-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.5.2/cytoscape.min.js"></script>
     <script type="text/javascript" src="'.$path.'/js/network.js"></script>
     <script type="text/javascript" src="'.$path.'/js/functions.js"></script>
     <script type="text/javascript" src="'.$path.'/js/require.min.js"></script>
@@ -378,12 +379,60 @@ echo'
     		</div>
     	</div>
     </div>
-
-
-
 ';
 }
-
+function display_cy_panel($element, $path){
+    // SVG container
+    echo'
+    <div class="svg-container">
+        <div style="float:left;height:650px;width:1000px;display:block;" id="cy""></div>
+    </div>';
+    // Accordion and panels of network information
+    echo'
+    <div class="nav-network" id="accordion" style="float:left;width:400px;">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-info" aria-expanded="true" aria-controls="display-info">
+            <i class="fas fa-info-circle fa-3x"></i>
+        </button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-query" aria-expanded="false" aria-controls="display-query">
+            <i class="fas fa-search fa-3x"></i>
+        </button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#display-config" aria-expanded="false" aria-controls="display-config">
+            <i class="fas fa-cog fa-3x"></i>
+        </button>
+        <div class="collapse" id="display-info" style="float:left;width:400px;">
+            <br />
+            <div class="alert alert-info">Click on a <b>node</b> or an <b>edge</b> to display information about it.</div>
+        </div>
+        <div class="collapse" id="display-query" style="float:left;width:400px;">
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-heading">Query</div>
+                <div class="panel-body">Queries</div>
+            </div>
+        </div>
+        <div class="collapse" id="display-config" style="float:left;width:400px;">
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-heading">Setting</div>
+                <div class="panel-body">
+                    <div id=checkbox-interaction>
+                        <b>Data interaction:</b>
+                        <div class="checkbox">
+                            <label for="pv_check">
+                              <input type="checkbox" id="pv_check" checked=true disabled> Plant Virus
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label for="pp_check">
+                              <input type="checkbox" id="pp_check" data-element="'.$element.'" data-path="'.$path.'"> Plant Plant
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
 
 
 
