@@ -2307,12 +2307,8 @@ function load_and_display_ppinteractions($full_mappingsCollection,$gene_id,$prot
 
         foreach ($value as $data) {
             if (is_array($data)){
-//                if ($species==="Hordeum vulgare"){
-//                    $transcript_list = explode("_MLOC", $data['Transcript ID list']);
-//                }
-//                else{
-                    $transcript_list = explode("_", $data['Transcript ID list']);
-                //}
+                
+                $transcript_list = explode("_", $data['Transcript ID list']);
                 
                 foreach ($transcript_list as $transcript) {
                     $combined_score = explode("-",  $transcript);

@@ -822,19 +822,15 @@ function load_pv_interaction(element, path){
 function load_pp_interaction(element, path){
     species=element.getAttribute('data-species');
     gene_id=element.getAttribute('data-id');
-    
     gene_ids=element.getAttribute('data-gene');
     transcript_ids=element.getAttribute('data-transcript');
     protein_ids=element.getAttribute('data-protein');
-
     mode=element.getAttribute('data-mode');
-    
     
     if (pp_already_open==="true"){
        //alert("already open");
        //open="false";
-    }
-    else{
+    }else{
         $.ajax({
 
             url : path + 'functions/interactions_main_page.php', // La ressource ciblée
@@ -863,8 +859,7 @@ function load_pp_interaction(element, path){
                    $(".pp_interaction_area").empty().append(par);
                    table=$(".pp_interaction").find("table");
                    load_table2(table);
-                }
-                else{
+                }else{
                    par=jqObj.find(".no_results");
                    $(".pp_interaction_area").empty().append(par);
                    
@@ -1706,7 +1701,7 @@ function load_network(element, path){
                             "virus_symbol": items[item]["mapping_file"]["Virus_symbol"],
                             "database_identifier": items[item]["mapping_file"]["database_identifier"],
                             "pmid": items[item]["mapping_file"]["pmid"],
-                            "protein_alias_2": items[item]["mapping_file"]["protein_alias_2"],
+                            "alias": items[item]["mapping_file"]["protein_alias_2"],
                             "virus": items[item]["mapping_file"]["virus"],
                             "id": id,
                             "species": items[item]["mapping_file"]["species"],
@@ -1793,30 +1788,62 @@ function add_pp_interactions(cy, path, element){
                 var items = result;
                 var current_nodes = [];
                 for (item in items){
-                    var id = items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"];
+                    var id = undefined; 
+                    if ( items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] != undefined ) { 
+                        id = items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"];
+                    }else if ( items[item]["mapping_file"]["Transcript ID"] != undefined ) {
+                        id = items[item]["mapping_file"]["Transcript ID"];
+                    }else if ( items[item]["mapping_file"]["Uniprot ID"] != undefined ) {
+                        id = items[item]["mapping_file"]["Uniprot ID"];
+                    }
+                    var pmid = undefined;
+                    if (items[item]["mapping_file"]["PUBMED_ID"] != undefined){
+                        pmid = items[item]["mapping_file"]["PUBMED_ID"];
+                    }else{
+                        pmid = items[item]["mapping_file"]["pmid"];
+                    }
+                    var method = undefined;
+                    if (items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"] != undefined){
+                        method = items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"];
+                    }else{
+                        method = items[item]["mapping_file"]["detection_method"];
+                    }
+                    var ref = undefined;
+                    if (items[item]["mapping_file"]["SOURCE"] != undefined) {
+                        ref = items[item]["mapping_file"]["SOURCE"];
+                    }else{
+                        ref = items[item]["mapping_file"]["author_name"];
+                    }
 
                     // -1 == not found
                     if (nodes_init_id.indexOf(id) != -1) { // found in nodes_init
-                        var n = nodes.filter(obj => {
-                            if (obj.id == id){
-                                return(obj)
+                        cy.filter(function(element, i){
+                            if (element.isEdge() && element.data('source') == id){
+                                // console.log(element);
                             }
                         });
                     }else{ // not found
                         if (current_nodes.indexOf(id) != -1){ // found in current_codes
                             var n = links.filter(obj => {
                                 if (obj.data.source == id){
-                                    obj.data.method = [obj.data.method, items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"]];
-                                    obj.data.author_name = [obj.data.author_name, items[item]["mapping_file"]["SOURCE"]];
-                                    obj.data.pmid = [obj.data.pmid, items[item]["mapping_file"]["PUBMED_ID"]]
+                                    if (Array.isArray(obj.data.method)) {
+                                        obj.data.method.push(method)
+                                        obj.data.author_name.push(ref);
+                                        obj.data.pmid.push(pmid);
+                                    }else{
+                                        obj.data.method = [obj.data.method, method];
+                                        obj.data.author_name = [obj.data.author_name, ref];
+                                        obj.data.pmid = [obj.data.pmid, pmid];
+                                    }
                                 }
                             });
                         }else{ // not found
                             nodes.push({
                                 data: {
-                                    "alias": items[item]["mapping_file"]["ALIASES_FOR_B"],
+                                    "alias": (items[item]["mapping_file"]["ALIASES_FOR_B"] != undefined) ? items[item]["mapping_file"]["ALIASES_FOR_B"] : items[item]["mapping_file"]["Transcript ID list"],
                                     "gene_id": items[item]["mapping_file"]["Gene ID 2"],
-                                    "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                                    "transcript_id": items[item]["mapping_file"]["Transcript ID"],
+                                    "id": id,
                                     "species": (items[item]["mapping_file"]["ORGANISM_B_ID"] == 3702) ? "Arabidopsis thaliana" : "undefined",
                                     "search": false,
                                     "type": "PP"
@@ -1824,12 +1851,12 @@ function add_pp_interactions(cy, path, element){
                             });
                             var dict = {
                                 data: {
-                                    "source": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"],
+                                    "source": id,
                                     "target": gene_id,
-                                    "id": items[item]["mapping_file"]["OFFICIAL_SYMBOL_B"] + "_" + gene_id,
-                                    "method": items[item]["mapping_file"]["EXPERIMENTAL_SYSTEM"],
-                                    "author_name": items[item]["mapping_file"]["SOURCE"],
-                                    "pmid": items[item]["mapping_file"]["PUBMED_ID"]
+                                    "id": id + "_" + gene_id,
+                                    "method": method,
+                                    "author_name": ref,
+                                    "pmid": pmid
                                 }
                             };
                             links.push(dict);
@@ -1844,12 +1871,7 @@ function add_pp_interactions(cy, path, element){
                 });
                 // Run simulation
                 cy.layout(config_layout).run();
-                // Add specific class to the plant-plant node
-                cy.filter(function(element, i){
-                    if( element.isNode() && element.data("type") === "PP" ){
-                        element.addClass('class-node-pp');
-                    } 
-                }); 
+                make_filter(cy);
             } // end if
         }
     });

@@ -34,9 +34,9 @@ if (isset($_POST['gene_ids'],$_POST['transcript_ids'],$_POST['protein_ids'],$_PO
     }else if ( $type == 'PP'){
     	$pp_interactionsCollection = new Mongocollection($db, "pp_interactions");
     	$pp_result = get_intact_plant_plant_interactor($protein_ids,$pp_interactionsCollection,$species);
-    	$biogrid_array=get_biogrid_plant_plant_interactor($gene_id, $pp_interactionsCollection, $species); 
+    	$biogrid_array=get_biogrid_plant_plant_interactor($gene_id, $pp_interactionsCollection, $species);
     	$string_array=get_string_plant_plant_interactor($transcript_ids, $pp_interactionsCollection, $species);
-    	// conaten all the results 
+    	// concaten all the results 
     	$final_result = array_merge($pp_result['cursor']['firstBatch'], $string_array['cursor']['firstBatch'], $biogrid_array['cursor']['firstBatch'] );
 		if (count($final_result)>0){
 			echo json_encode($final_result);
